@@ -1,0 +1,35 @@
+body {
+  font-family: sans-serif;
+  background: #f8f9fa;
+  margin: 0;
+  padding: 1rem;
+}
+.container {
+  max-width: 1000px;
+  margin: auto;
+}
+h1 {
+  margin-bottom: 1rem;
+}
+label {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+select {
+  padding: 0.4rem;
+  font-size: 1rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+th, td {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  text-align: center;
+  font-family: monospace;
+}
+th {
+  background: #dee2e6;
+}
