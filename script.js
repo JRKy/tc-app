@@ -40,11 +40,11 @@ function generateTable(baseZone) {
   for (let i = 0; i < 24; i++) {
     const time = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
     const row = document.createElement("tr");
-    const baseTime = dateFnsTz.utcToZonedTime(time, baseZone);
-    row.innerHTML = `<td>${dateFns.format(baseTime, "HH:mm")}</td>` +
+    const baseTime = window.dateFnsTz.utcToZonedTime(time, baseZone);
+    row.innerHTML = `<td>${window.dateFns.format(baseTime, "HH:mm")}</td>` +
       Object.values(cities).map(tz => {
-        const local = dateFnsTz.utcToZonedTime(time, tz);
-        return `<td>${dateFns.format(local, "HH:mm")}</td>`;
+        const local = window.dateFnsTz.utcToZonedTime(time, tz);
+        return `<td>${window.dateFns.format(local, "HH:mm")}</td>`;
       }).join("");
     tableBody.appendChild(row);
   }
