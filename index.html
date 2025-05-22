@@ -5,19 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Time Zone Comparison Tool</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
 <body>
   <div class="container">
-    <h1>Time Zone Comparison Tool</h1>
-    <label for="timezone">Base Time Zone:</label>
-    <select id="timezone"></select>
-    <table id="timezone-table">
-      <thead></thead>
-      <tbody></tbody>
-    </table>
+    <header>
+      <h1>Time Zone Comparison Tool</h1>
+      <div class="controls">
+        <label for="timezone">Base Time Zone:</label>
+        <select id="timezone"></select>
+        <button id="toggle-theme">🌙 Toggle Dark Mode</button>
+        <button id="download-pdf">📄 Download PDF</button>
+      </div>
+    </header>
+    <main>
+      <table id="timezone-table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </main>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0/dist/date-fns.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/date-fns-tz@1.3.7/dist/date-fns-tz.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
