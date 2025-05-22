@@ -89,7 +89,25 @@ window.onload = function () {
         Object.values(cities).map(tz => {
           const local = window.dateFnsTz.utcToZonedTime(utcTime, tz);
           const hour = parseInt(window.dateFns.format(local, "HH"), 10);
-          return `<td>${window.dateFns.format(local, "HH:mm")}</td>`;
+          
+      const localTimeStr = window.dateFns.format(local, "HH:mm");
+      const localHour = parseInt(window.dateFns.format(local, "HH"), 10);
+      const isSleep = localHour < 6 || localHour >= 22;
+      const isWork = localHour >= 8 && localHour < 17;
+      const isPast = utcTime < new Date();
+
+      const classes = [];
+      if (isPast) classes.push("past");
+      if (isSleep) classes.push("sleep");
+      else if (isWork) classes.push("work");
+      else classes.push("off");
+
+      if (tz === baseZone && window.dateFns.format(utcTime, "HH:mm") === nowHHMM) {
+        classes.push("now-cell");
+      }
+
+      return `<td class="${classes.join(" ")}">${localTimeStr}</td>`;
+    
         }).join("");
       tableBody.appendChild(row);
     }
