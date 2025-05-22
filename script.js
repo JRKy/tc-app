@@ -103,9 +103,13 @@ const label = `${name}${isDST ? " *" : ""} (${getUTCOffsetLabel(tz)})`;
 
       let classes = [];
       if (isPast) classes.push("past");
-      if (isSleep) classes.push("sleep");
-      else if (isWork) classes.push("work");
-      else classes.push("off");
+      if (isSleep) {
+        classes.push("sleep");
+      } else if (isWork) {
+        classes.push("work");
+      } else {
+        classes.push("off");
+      }
 
       return `<td class="${classes.join(" ")}">${cellTime}</td>`;
     
@@ -142,5 +146,5 @@ const label = `${name}${isDST ? " *" : ""} (${getUTCOffsetLabel(tz)})`;
     }
   };
 
-  renderDeleteButtons();
+  setTimeout(renderDeleteButtons, 0);
 };
