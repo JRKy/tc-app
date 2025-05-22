@@ -118,7 +118,11 @@ window.onload = function () {
         classes.push("now-cell");
       }
 
-      return `<td class="${classes.join(" ")}">${localTimeStr} [${localHour}]</td>`;
+      
+      const dateFnsType = typeof dateFns;
+      const localStr = String(local);
+      return `<td>${localTimeStr} [${localHour}] type:${dateFnsType} local:${localStr}</td>`;
+    
     
     }).join("");
     row.innerHTML = `<td>${utcLabel}</td>` + cells;
