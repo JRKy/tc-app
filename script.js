@@ -1,4 +1,19 @@
 
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function format(date, token) {
+  if (token === 'HH') return pad(date.getHours());
+  if (token === 'mm') return pad(date.getMinutes());
+  return '';
+}
+
+function utcToZonedTime(date, timeZone) {
+  const invdate = new Date(date.toLocaleString('en-US', { timeZone }));
+  const diff = date.getTime() - invdate.getTime();
+  return new Date(date.getTime() + diff);
+}
+
+
+
 const cities = {
   "Los Angeles": "America/Los_Angeles",
   "Denver": "America/Denver",
@@ -89,15 +104,15 @@ window.onload = function () {
 
       const utcTime = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
       const row = document.createElement("tr");
-      const utcLabel = dateFns.format(utcTime, "HH:mm");
+      const utcLabel = format(utcTime, "HH:mm");
       if (Math.abs(utcTime.getTime() - nowUTCSlot.getTime()) < 1000) row.classList.add("now-row");
 
       
     let cells = Object.values(cities).map(tz => {
       
-      const local = dateFnsTz.utcToZonedTime(utcTime, tz);
-      const localHour = parseInt(dateFns.format(local, "HH"), 10);
-      const localTimeStr = dateFns.format(local, "HH:mm");
+      const local = utcToZonedTime(utcTime, tz);
+      const localHour = parseInt(format(local, "HH"), 10);
+      const localTimeStr = format(local, "HH:mm");
 
       const classes = [];
 
@@ -119,7 +134,7 @@ window.onload = function () {
       }
 
       
-      const dateFnsType = typeof dateFns.format;
+      const dateFnsType = typeof dateFns;
       const localStr = String(local);
       return `<td>${localTimeStr} [${localHour}] type:${dateFnsType} local:${localStr}</td>`;
     
@@ -128,9 +143,9 @@ window.onload = function () {
     row.innerHTML = `<td>${utcLabel}</td>` + cells;
      
         Object.values(cities).map(tz => {
-          const local = dateFnsTz.utcToZonedTime(utcTime, tz);
-          const hour = parseInt(dateFns.format(local, "HH"), 10);
-          return `<td>${dateFns.format(local, "HH:mm")}</td>`;
+          const local = utcToZonedTime(utcTime, tz);
+          const hour = parseInt(format(local, "HH"), 10);
+          return `<td>${format(local, "HH:mm")}</td>`;
         }).join("");
       tableBody.appendChild(row);
     }
