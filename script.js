@@ -82,3 +82,21 @@ window.onload = function () {
     }
   };
 };
+
+// Dark mode toggle
+document.getElementById("toggle-theme").onclick = () => {
+  document.body.classList.toggle("dark");
+};
+
+// PDF download
+document.getElementById("download-pdf").onclick = () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text("Time Zone Comparison Table", 10, 10);
+  const rows = [...document.querySelectorAll("#timezone-table tbody tr")].map(row =>
+    [...row.querySelectorAll("td")].map(td => td.textContent)
+  );
+  const headers = [...document.querySelectorAll("#timezone-table thead th")].map(th => th.textContent);
+  doc.autoTable({ head: [headers], body: rows, startY: 20 });
+  doc.save("timezone-table.pdf");
+};
