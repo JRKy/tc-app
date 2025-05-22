@@ -107,7 +107,7 @@ tr.now-row td {
 }
 
 td.past {
-  background-color: #f0f0f0;
+  background-color: #e0e0e0;
 }
 td.sleep {
   background-color: #d0e3ff;
@@ -116,7 +116,7 @@ td.work {
   background-color: #d4edda;
 }
 td.off {
-  background-color: #fff3cd;
+  background-color: #fff8dc;
 }
 td.now-cell {
   font-weight: bold;
