@@ -1,5 +1,18 @@
 window.onload = function () {
-const cities = {"Los Angeles": "America/Los_Angeles", "Denver": "America/Denver", "Chicago": "America/Chicago", "New York": "America/New_York", "UTC": "Etc/UTC", "London": "Europe/London", "Berlin": "Europe/Berlin", "Dubai": "Asia/Dubai", "Mumbai": "Asia/Kolkata", "Singapore": "Asia/Singapore", "Tokyo": "Asia/Tokyo", "Sydney": "Australia/Sydney"};
+const cities = {
+  "Los Angeles": "America/Los_Angeles",
+  "Denver": "America/Denver",
+  "Chicago": "America/Chicago",
+  "New York": "America/New_York",
+  "UTC": "Etc/UTC",
+  "London": "Europe/London",
+  "Berlin": "Europe/Berlin",
+  "Dubai": "Asia/Dubai",
+  "Mumbai": "Asia/Kolkata",
+  "Singapore": "Asia/Singapore",
+  "Tokyo": "Asia/Tokyo",
+  "Sydney": "Australia/Sydney"
+};
   "Baker Island": "Etc/GMT+12",
   "Los Angeles": "America/Los_Angeles",
   "Denver": "America/Denver",
