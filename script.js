@@ -73,7 +73,8 @@ window.onload = function () {
 
     const headRow = document.createElement("tr");
     headRow.innerHTML = "<th>UTC</th>" + Object.entries(cities).map(([name, tz]) => {
-      const label = `${name} (${getUTCOffsetLabel(tz)})`;
+      const isDST = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" }).formatToParts(new Date()).some(p => p.type === "timeZoneName" && p.value.includes("DT"));
+const label = `${name}${isDST ? " *" : ""} (${getUTCOffsetLabel(tz)})`;
       return "<th class='" + (tz === baseZone ? "highlight" : "") + "'>" + label + "</th>";
     }).join("");
     tableHead.appendChild(headRow);
@@ -89,7 +90,26 @@ window.onload = function () {
           const local = window.dateFnsTz.utcToZonedTime(utcTime, tz);
           const hour = parseInt(window.dateFns.format(local, "HH"), 10);
           const isWorkHour = hour >= 8 && hour < 17;
-          return `<td class="${isWorkHour ? 'work-hour' : ''}">${window.dateFns.format(local, "HH:mm")}</td>`;
+          
+      const nowUTC = new Date();
+      const utcHour = utcTime.getUTCHours();
+      const cellTime = window.dateFns.format(local, "HH:mm");
+      const hour = parseInt(cellTime.split(":")[0], 10);
+      const minute = parseInt(cellTime.split(":")[1], 10);
+      const totalMins = hour * 60 + minute;
+
+      const isPast = utcTime.getTime() < nowUTC.getTime();
+      const isSleep = totalMins < 360 || totalMins >= 1320;
+      const isWork = totalMins >= 480 && totalMins < 1020;
+
+      let classes = [];
+      if (isPast) classes.push("past");
+      if (isSleep) classes.push("sleep");
+      else if (isWork) classes.push("work");
+      else classes.push("off");
+
+      return `<td class="${classes.join(" ")}">${cellTime}</td>`;
+    
         }).join("");
       tableBody.appendChild(row);
     }

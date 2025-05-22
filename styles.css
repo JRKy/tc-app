@@ -85,3 +85,16 @@ td.work-hour {
 .highlight {
   background-color: #fff3cd;
 }
+
+td.past {
+  background-color: #f0f0f0;
+}
+td.sleep {
+  background-color: #d0e3ff;
+}
+td.work {
+  background-color: #d4edda;
+}
+td.off {
+  background-color: #fff3cd;
+}
