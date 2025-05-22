@@ -1,3 +1,4 @@
+window.onload = function () {
 const cities = {
   "Baker Island": "Etc/GMT+12",
   "Los Angeles": "America/Los_Angeles",
@@ -75,3 +76,5 @@ generateTable("America/Denver");
 timezoneSelect.addEventListener("change", () => {
   generateTable(timezoneSelect.value);
 });
+
+};
