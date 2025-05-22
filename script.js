@@ -16,13 +16,12 @@ let customCities = JSON.parse(localStorage.getItem("customCities") || "[]");
 
 function getUTCOffsetLabel(tz) {
   const now = new Date();
-  const zoned = window.dateFnsTz.utcToZonedTime(now, tz);
-  const offsetMin = (zoned.getTime() - now.getTime()) / 60000;
+  const local = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+  const offsetMin = Math.round((local - now) / 60000);
   const sign = offsetMin >= 0 ? "+" : "-";
-  const absMin = Math.abs(offsetMin);
-  const hours = Math.floor(absMin / 60).toString().padStart(2, "0");
-  const minutes = Math.floor(absMin % 60).toString().padStart(2, "0");
-  return `UTC${sign}${hours}:${minutes}`;
+  const h = Math.floor(Math.abs(offsetMin) / 60).toString().padStart(2, "0");
+  const m = (Math.abs(offsetMin) % 60).toString().padStart(2, "0");
+  return `UTC${sign}${h}:${m}`;
 }
 
 
@@ -81,17 +80,9 @@ window.onload = function () {
     const baseDate = new Date();
     baseDate.setUTCHours(0, 0, 0, 0);
 
-    const currentUTC = new Date();
-  const nowHH = currentUTC.getUTCHours();
-  const nowMM = currentUTC.getUTCMinutes();
-  const nowSlot = Math.floor(nowHH * 2 + nowMM / 30);
-
-  for (let i = 0; i < 48; i++) {
+    for (let i = 0; i < 48; i++) {
       const utcTime = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
-      
-    const row = document.createElement("tr");
-    if (i === nowSlot) row.classList.add("now-row");
-    
+      const row = document.createElement("tr");
       row.innerHTML = `<td>${window.dateFns.format(utcTime, "HH:mm")}</td>` + 
         Object.values(cities).map(tz => {
           const local = window.dateFnsTz.utcToZonedTime(utcTime, tz);
@@ -99,11 +90,7 @@ window.onload = function () {
           const isWorkHour = hour >= 8 && hour < 17;
           return `<td class="${isWorkHour ? 'work-hour' : ''}">${window.dateFns.format(local, "HH:mm")}</td>`;
         }).join("");
-      
-    const workCells = [...row.querySelectorAll("td")].filter(td => td.classList.contains("work"));
-    if (workCells.length >= 3 && !row.classList.contains("now-row")) row.classList.add("suggest-slot");
-    tableBody.appendChild(row);
-    
+      tableBody.appendChild(row);
     }
   }
 
@@ -135,5 +122,5 @@ window.onload = function () {
     }
   };
 
-  renderDeleteButtons();
+  setTimeout(renderDeleteButtons, 10);
 };
