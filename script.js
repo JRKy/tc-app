@@ -1,4 +1,3 @@
-window.onload = function () {
 const cities = {
   "Los Angeles": "America/Los_Angeles",
   "Denver": "America/Denver",
@@ -13,7 +12,10 @@ const cities = {
   "Tokyo": "Asia/Tokyo",
   "Sydney": "Australia/Sydney"
 };
-  "Baker Island": "Etc/GMT+12",
+
+
+window.onload = function () {
+"Baker Island": "Etc/GMT+12",
   "Los Angeles": "America/Los_Angeles",
   "Denver": "America/Denver",
   "New York": "America/New_York",
@@ -112,5 +114,4 @@ generateTable("America/Denver");
 timezoneSelect.addEventListener("change", () => {
   generateTable(timezoneSelect.value);
 });
-
 };
