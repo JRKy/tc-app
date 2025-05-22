@@ -1,3 +1,35 @@
+
+let customCities = JSON.parse(localStorage.getItem("customCities") || "[]");
+
+// Helper to get UTC offset label
+function getUTCOffsetLabel(tz) {
+  const now = new Date();
+  const zoned = window.dateFnsTz.utcToZonedTime(now, tz);
+  const offsetMin = (zoned.getTime() - now.getTime()) / 60000;
+  const sign = offsetMin >= 0 ? "+" : "-";
+  const hours = Math.floor(Math.abs(offsetMin) / 60).toString().padStart(2, "0");
+  const minutes = Math.abs(offsetMin) % 60 === 0 ? "00" : "30";
+  return `UTC${sign}${hours}:${minutes}`;
+}
+
+// Render delete buttons for custom cities
+function renderDeleteButtons() {
+  const container = document.querySelector(".custom-city-controls");
+  if (!container) return;
+  container.innerHTML = "";
+  customCities.forEach(city => {
+    const btn = document.createElement("button");
+    btn.textContent = `🗑️ ${city}`;
+    btn.onclick = () => {
+      customCities = customCities.filter(c => c !== city);
+      localStorage.setItem("customCities", JSON.stringify(customCities));
+      location.reload();
+    };
+    container.appendChild(btn);
+  });
+}
+
+
 const cities = {
   "Los Angeles": "America/Los_Angeles",
   "Denver": "America/Denver",
@@ -22,7 +54,7 @@ window.onload = function () {
   const tableHead = document.querySelector("#timezone-table thead");
   const tableBody = document.querySelector("#timezone-table tbody");
   
-let customCities = JSON.parse(localStorage.getItem("customCities") || "[]");
+
 customCities.forEach((newCity) => {
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: newCity });
@@ -39,7 +71,7 @@ customCities.forEach((newCity) => {
     .forEach(([name, tz]) => {
     const option = document.createElement("option");
     option.value = tz;
-    option.textContent = `${name} (${getUTCOffsetLabel(tz)})`;
+    option.textContent = `${name} (${tz})`;
     timezoneSelect.appendChild(option);
   });
 
@@ -77,7 +109,6 @@ customCities.forEach((newCity) => {
 
   timezoneSelect.addEventListener("change", () => {
     generateTable(timezoneSelect.value);
-    renderDeleteButtons();
   });
 
   addBtn.onclick = () => {
@@ -94,7 +125,6 @@ customCities.forEach((newCity) => {
         opt.textContent = cityName + " (Custom)";
         timezoneSelect.appendChild(opt);
         generateTable(timezoneSelect.value);
-    renderDeleteButtons();
         customInput.value = "";
       } catch (e) {
         alert("Invalid time zone.");
@@ -121,33 +151,5 @@ document.getElementById("download-pdf").onclick = () => {
   doc.save("timezone-table.pdf");
 };
 
-
-function getUTCOffsetLabel(tz) {
-  const now = new Date();
-  const zoned = window.dateFnsTz.utcToZonedTime(now, tz);
-  const offsetMin = (zoned.getTime() - now.getTime()) / 60000;
-  const sign = offsetMin >= 0 ? "+" : "-";
-  const hours = Math.floor(Math.abs(offsetMin) / 60).toString().padStart(2, "0");
-  const minutes = Math.abs(offsetMin) % 60 === 0 ? "00" : "30";
-  return `UTC${sign}${hours}:${minutes}`;
-}
-
-
-// Render delete buttons for custom cities
-function renderDeleteButtons() {
-  const container = document.querySelector(".custom-city-controls");
-  if (!container) return;
-  container.innerHTML = "";
-  customCities.forEach(city => {
-    const btn = document.createElement("button");
-    btn.textContent = `🗑️ $Auckland`;
-    btn.onclick = () => {
-      customCities = customCities.filter(c => c !== city);
-      localStorage.setItem("customCities", JSON.stringify(customCities));
-      location.reload();  // simple way to refresh app state
-    };
-    container.appendChild(btn);
-  });
-}
 
 renderDeleteButtons();
