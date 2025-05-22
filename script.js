@@ -79,37 +79,24 @@ window.onload = function () {
     const baseDate = new Date();
     baseDate.setUTCHours(0, 0, 0, 0);
 
-    for (let i = 0; i < 48; i++) {
+    
+  const now = new Date();
+  const baseZoneNow = new Date(now.toLocaleString("en-US", { timeZone: baseZone }));
+  const nowUTCSlot = new Date(Math.round(now.getTime() / (30 * 60 * 1000)) * 30 * 60 * 1000);
+  const nowLocalSlot = new Date(Math.round(baseZoneNow.getTime() / (30 * 60 * 1000)) * 30 * 60 * 1000);
+
+  for (let i = 0; i < 48; i++) {
+
       const utcTime = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
       const row = document.createElement("tr");
       const utcLabel = window.dateFns.format(utcTime, "HH:mm");
-      if (utcLabel === nowHHMM) row.classList.add("now-row");
+      if (Math.abs(utcTime.getTime() - nowUTCSlot.getTime()) < 1000) row.classList.add("now-row");
 
       row.innerHTML = `<td>${utcLabel}</td>` + 
         Object.values(cities).map(tz => {
           const local = window.dateFnsTz.utcToZonedTime(utcTime, tz);
           const hour = parseInt(window.dateFns.format(local, "HH"), 10);
-          
-      const localTimeStr = window.dateFns.format(local, "HH:mm");
-      const localHour = parseInt(window.dateFns.format(local, "HH"), 10);
-      const isSleep = localHour < 6 || localHour >= 22;
-      const isWork = localHour >= 8 && localHour < 17;
-
-      const classes = [];
-      if (isSleep) classes.push("sleep");
-      else if (isWork) classes.push("work");
-      else classes.push("off");
-
-      const isPast = utcTime < new Date();
-      if (isPast) classes.push("past");
-
-      const nowLocal = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: baseZone });
-      if (tz === baseZone && localTimeStr === nowLocal) {
-        classes.push("now-cell");
-      }
-
-      return `<td class="${classes.join(" ")}">${localTimeStr}</td>`;
-    
+          return `<td>${window.dateFns.format(local, "HH:mm")}</td>`;
         }).join("");
       tableBody.appendChild(row);
     }
