@@ -94,8 +94,7 @@ const label = `${name}${isDST ? " *" : ""} (${getUTCOffsetLabel(tz)})`;
       const nowUTC = new Date();
       const utcHour = utcTime.getUTCHours();
       const cellTime = window.dateFns.format(local, "HH:mm");
-      const hour = parseInt(cellTime.split(":")[0], 10);
-      const minute = parseInt(cellTime.split(":")[1], 10);
+      const minute = parseInt(window.dateFns.format(local, "mm"), 10);
       const totalMins = hour * 60 + minute;
 
       const isPast = utcTime.getTime() < nowUTC.getTime();
