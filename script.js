@@ -13,7 +13,6 @@ const cities = {
 
 let customCities = JSON.parse(localStorage.getItem("customCities") || "[]");
 
-
 function getUTCOffsetLabel(tz) {
   const now = new Date();
   const local = new Date(now.toLocaleString("en-US", { timeZone: tz }));
@@ -24,14 +23,13 @@ function getUTCOffsetLabel(tz) {
   return `UTC${sign}${h}:${m}`;
 }
 
-
 function renderDeleteButtons() {
   const container = document.querySelector(".custom-city-controls");
   if (!container) return;
   container.innerHTML = "";
   customCities.forEach(city => {
     const btn = document.createElement("button");
-    btn.textContent = `🗑️ $Auckland`;
+    btn.textContent = `🗑️ ${city}`;
     btn.onclick = () => {
       customCities = customCities.filter(c => c !== city);
       localStorage.setItem("customCities", JSON.stringify(customCities));
@@ -41,12 +39,12 @@ function renderDeleteButtons() {
   });
 }
 
-customCities.forEach((newCity) => {
+customCities.forEach(city => {
   try {
-    new Intl.DateTimeFormat("en-US", { timeZone: newCity });
-    const cityName = newCity.split("/").pop().replace(/_/g, " ");
-    cities[cityName + " (Custom)"] = newCity;
-  } catch {}
+    new Intl.DateTimeFormat("en-US", { timeZone: city });
+    const label = city.split("/").pop().replace(/_/g, " ");
+    cities[label + " (Custom)"] = city;
+  } catch (e) {}
 });
 
 window.onload = function () {
@@ -56,15 +54,12 @@ window.onload = function () {
   const tableHead = document.querySelector("#timezone-table thead");
   const tableBody = document.querySelector("#timezone-table tbody");
 
-  Object.entries(cities)
-    .sort((a, b) => (new Date().toLocaleTimeString("en-US", { timeZone: a[1], hour12: false })).localeCompare(
-                     new Date().toLocaleTimeString("en-US", { timeZone: b[1], hour12: false })))
-    .forEach(([name, tz]) => {
-      const option = document.createElement("option");
-      option.value = tz;
-      option.textContent = `${name} (${getUTCOffsetLabel(tz)})`;
-      timezoneSelect.appendChild(option);
-    });
+  Object.entries(cities).forEach(([name, tz]) => {
+    const option = document.createElement("option");
+    option.value = tz;
+    option.textContent = `${name} (${getUTCOffsetLabel(tz)})`;
+    timezoneSelect.appendChild(option);
+  });
 
   function generateTable(baseZone) {
     tableHead.innerHTML = "";
@@ -77,18 +72,24 @@ window.onload = function () {
     }).join("");
     tableHead.appendChild(headRow);
 
+    const nowUTC = new Date();
+    const nowHHMM = nowUTC.getUTCHours().toString().padStart(2, "0") + ":" + 
+                    (Math.floor(nowUTC.getUTCMinutes() / 30) * 30).toString().padStart(2, "0");
+
     const baseDate = new Date();
     baseDate.setUTCHours(0, 0, 0, 0);
 
     for (let i = 0; i < 48; i++) {
       const utcTime = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
       const row = document.createElement("tr");
-      row.innerHTML = `<td>${window.dateFns.format(utcTime, "HH:mm")}</td>` + 
+      const utcLabel = window.dateFns.format(utcTime, "HH:mm");
+      if (utcLabel === nowHHMM) row.classList.add("now-row");
+
+      row.innerHTML = `<td>${utcLabel}</td>` + 
         Object.values(cities).map(tz => {
           const local = window.dateFnsTz.utcToZonedTime(utcTime, tz);
           const hour = parseInt(window.dateFns.format(local, "HH"), 10);
-          const isWorkHour = hour >= 8 && hour < 17;
-          return `<td class="${isWorkHour ? 'work-hour' : ''}">${window.dateFns.format(local, "HH:mm")}</td>`;
+          return `<td>${window.dateFns.format(local, "HH:mm")}</td>`;
         }).join("");
       tableBody.appendChild(row);
     }
@@ -106,15 +107,16 @@ window.onload = function () {
     if (newCity && !Object.values(cities).includes(newCity) && !customCities.includes(newCity)) {
       try {
         new Intl.DateTimeFormat("en-US", { timeZone: newCity });
-        const cityName = newCity.split("/").pop().replace(/_/g, " ");
-        cities[cityName + " (Custom)"] = newCity;
+        const name = newCity.split("/").pop().replace(/_/g, " ");
+        cities[name + " (Custom)"] = newCity;
         customCities.push(newCity);
         localStorage.setItem("customCities", JSON.stringify(customCities));
         const opt = document.createElement("option");
         opt.value = newCity;
-        opt.textContent = cityName + " (Custom)";
+        opt.textContent = name + " (Custom)";
         timezoneSelect.appendChild(opt);
         generateTable(timezoneSelect.value);
+        renderDeleteButtons();
         customInput.value = "";
       } catch (e) {
         alert("Invalid time zone.");
@@ -122,5 +124,5 @@ window.onload = function () {
     }
   };
 
-  setTimeout(renderDeleteButtons, 10);
+  renderDeleteButtons();
 };

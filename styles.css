@@ -100,12 +100,8 @@ td.off {
 }
 
 tr.now-row td {
-  border-top: 2px solid #2196f3;
-  border-bottom: 2px solid #2196f3;
-  background-color: #e3f2fd;
-}
-
-tr.suggest-slot td {
-  outline: 2px dashed #4caf50;
-  outline-offset: -2px;
+  background-color: #e1f5fe;
+  font-weight: bold;
+  border-top: 2px solid #29b6f6;
+  border-bottom: 2px solid #29b6f6;
 }
