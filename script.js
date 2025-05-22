@@ -3,6 +3,7 @@ function pad(n) { return n < 10 ? '0' + n : '' + n; }
 function format(date, token) {
   if (token === 'HH') return pad(date.getHours());
   if (token === 'mm') return pad(date.getMinutes());
+  if (token === 'HH:mm') return pad(date.getHours()) + ':' + pad(date.getMinutes());
   return '';
 }
 
