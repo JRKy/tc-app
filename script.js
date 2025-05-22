@@ -94,15 +94,17 @@ window.onload = function () {
       const localHour = parseInt(window.dateFns.format(local, "HH"), 10);
       const isSleep = localHour < 6 || localHour >= 22;
       const isWork = localHour >= 8 && localHour < 17;
-      const isPast = utcTime < new Date();
 
       const classes = [];
-      if (isPast) classes.push("past");
       if (isSleep) classes.push("sleep");
       else if (isWork) classes.push("work");
       else classes.push("off");
 
-      if (tz === baseZone && window.dateFns.format(utcTime, "HH:mm") === nowHHMM) {
+      const isPast = utcTime < new Date();
+      if (isPast) classes.push("past");
+
+      const nowLocal = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: baseZone });
+      if (tz === baseZone && localTimeStr === nowLocal) {
         classes.push("now-cell");
       }
 
