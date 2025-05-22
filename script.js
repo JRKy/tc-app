@@ -1,14 +1,11 @@
+
 const cities = {
   "Los Angeles": "America/Los_Angeles",
   "Denver": "America/Denver",
-  "Chicago": "America/Chicago",
   "New York": "America/New_York",
   "UTC": "Etc/UTC",
   "London": "Europe/London",
   "Berlin": "Europe/Berlin",
-  "Dubai": "Asia/Dubai",
-  "Mumbai": "Asia/Kolkata",
-  "Singapore": "Asia/Singapore",
   "Tokyo": "Asia/Tokyo",
   "Sydney": "Australia/Sydney"
 };
@@ -16,15 +13,18 @@ const cities = {
 
 let customCities = JSON.parse(localStorage.getItem("customCities") || "[]");
 
+
 function getUTCOffsetLabel(tz) {
   const now = new Date();
   const zoned = window.dateFnsTz.utcToZonedTime(now, tz);
   const offsetMin = (zoned.getTime() - now.getTime()) / 60000;
   const sign = offsetMin >= 0 ? "+" : "-";
-  const hours = Math.floor(Math.abs(offsetMin) / 60).toString().padStart(2, "0");
-  const minutes = Math.abs(offsetMin) % 60 === 0 ? "00" : "30";
+  const absMin = Math.abs(offsetMin);
+  const hours = Math.floor(absMin / 60).toString().padStart(2, "0");
+  const minutes = Math.floor(absMin % 60).toString().padStart(2, "0");
   return `UTC${sign}${hours}:${minutes}`;
 }
+
 
 function renderDeleteButtons() {
   const container = document.querySelector(".custom-city-controls");
@@ -32,7 +32,7 @@ function renderDeleteButtons() {
   container.innerHTML = "";
   customCities.forEach(city => {
     const btn = document.createElement("button");
-    btn.textContent = `🗑️ ${city}`;
+    btn.textContent = `🗑️ $Auckland`;
     btn.onclick = () => {
       customCities = customCities.filter(c => c !== city);
       localStorage.setItem("customCities", JSON.stringify(customCities));
