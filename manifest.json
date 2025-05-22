@@ -1,0 +1,15 @@
+{
+  "name": "Time Zone Comparison Tool",
+  "short_name": "TZ Tool",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
