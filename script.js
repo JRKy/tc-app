@@ -14,82 +14,53 @@ const cities = {
 };
 
 
+
 window.onload = function () {
-"Baker Island": "Etc/GMT+12",
-  "Los Angeles": "America/Los_Angeles",
-  "Denver": "America/Denver",
-  "New York": "America/New_York",
-  "London": "Europe/London",
-  "Berlin": "Europe/Berlin",
-  "Moscow": "Europe/Moscow",
-  "Mumbai": "Asia/Kolkata",
-  "Beijing": "Asia/Shanghai",
-  "Tokyo": "Asia/Tokyo",
-  "Sydney": "Australia/Sydney",
-  "Auckland": "Pacific/Auckland"
-};
+  const timezoneSelect = document.getElementById("timezone");
+  const addBtn = document.getElementById("add-city-btn");
+  const customInput = document.getElementById("custom-city");
+  const tableHead = document.querySelector("#timezone-table thead");
+  const tableBody = document.querySelector("#timezone-table tbody");
+  let customCities = [];
 
-const timezoneSelect = document.getElementById("timezone");
-const addBtn = document.getElementById("add-city-btn");
-const customInput = document.getElementById("custom-city");
-let customCities = [];
-const tableHead = document.querySelector("#timezone-table thead");
-const tableBody = document.querySelector("#timezone-table tbody");
+  Object.entries(cities).forEach(([name, tz]) => {
+    const option = document.createElement("option");
+    option.value = tz;
+    option.textContent = `${name} (${tz})`;
+    timezoneSelect.appendChild(option);
+  });
 
-// Populate the dropdown
-Object.entries(cities).forEach(([name, tz]) => {
-  const option = document.createElement("option");
-  option.value = tz;
-  option.textContent = `${name} (${tz})`;
-  timezoneSelect.appendChild(option);
-});
+  function generateTable(baseZone) {
+    tableHead.innerHTML = "";
+    tableBody.innerHTML = "";
 
-function generateTable(baseZone) {
-  tableHead.innerHTML = "";
-  tableBody.innerHTML = "";
+    const headRow = document.createElement("tr");
+    headRow.innerHTML = `<th>Time (${baseZone})</th>` +
+      Object.keys(cities).map(city => `<th>${city}</th>`).join("");
+    tableHead.appendChild(headRow);
 
-  const headRow = document.createElement("tr");
-  headRow.innerHTML = `<th>Time (${baseZone})</th>` +
-    Object.keys(cities).map(city => `<th>${city}</th>`).join("");
-  tableHead.appendChild(headRow);
+    const baseDate = new Date();
+    baseDate.setHours(0, 0, 0, 0);
 
-  const baseDate = new Date();
-  baseDate.setHours(0, 0, 0, 0);
-
-  for (let i = 0; i < 48; i++) {
-    const time = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
-    const row = document.createElement("tr");
-    const baseTime = window.dateFnsTz.utcToZonedTime(time, baseZone);
-    row.innerHTML = `<td>${window.dateFns.format(baseTime, "HH:mm")}</td>` +
-      Object.values(cities).map(tz => {
-        const local = window.dateFnsTz.utcToZonedTime(time, tz);
-        return `<td>${window.dateFns.format(local, "HH:mm")}</td>`;
-      }).join("");
-    tableBody.appendChild(row);
+    for (let i = 0; i < 48; i++) {
+      const time = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
+      const row = document.createElement("tr");
+      const baseTime = window.dateFnsTz.utcToZonedTime(time, baseZone);
+      row.innerHTML = `<td>${window.dateFns.format(baseTime, "HH:mm")}</td>` +
+        Object.values(cities).map(tz => {
+          const local = window.dateFnsTz.utcToZonedTime(time, tz);
+          return `<td>${window.dateFns.format(local, "HH:mm")}</td>`;
+        }).join("");
+      tableBody.appendChild(row);
+    }
   }
-}
 
-// Dark mode toggle
-document.getElementById("toggle-theme").onclick = () => {
-  document.body.classList.toggle("dark");
-};
+  timezoneSelect.value = "America/Denver";
+  generateTable("America/Denver");
 
-// PDF download
-document.getElementById("download-pdf").onclick = () => {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.text("Time Zone Comparison Table", 10, 10);
-  const rows = [...tableBody.querySelectorAll("tr")].map(row =>
-    [...row.querySelectorAll("td")].map(td => td.textContent)
-  );
-  const headers = [...tableHead.querySelectorAll("th")].map(th => th.textContent);
-  doc.autoTable({ head: [headers], body: rows, startY: 20 });
-  doc.save("timezone-table.pdf");
-};
-
-// Initial render
-timezoneSelect.value = "America/Denver";
-generateTable("America/Denver");
+  timezoneSelect.addEventListener("change", () => {
+    generateTable(timezoneSelect.value);
+  });
 
   addBtn.onclick = () => {
     const newCity = customInput.value.trim();
@@ -110,8 +81,4 @@ generateTable("America/Denver");
       }
     }
   };
-
-timezoneSelect.addEventListener("change", () => {
-  generateTable(timezoneSelect.value);
-});
 };
