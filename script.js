@@ -16,12 +16,12 @@ let customCities = JSON.parse(localStorage.getItem("customCities") || "[]");
 
 function getUTCOffsetLabel(tz) {
   const now = new Date();
-  const local = new Date(now.toLocaleString("en-US", { timeZone: tz }));
-  const offsetMin = Math.round((local - now) / 60000);
+  const zoned = window.dateFnsTz.utcToZonedTime(now, tz);
+  const offsetMin = (zoned.getTime() - now.getTime()) / 60000;
   const sign = offsetMin >= 0 ? "+" : "-";
   const absMin = Math.abs(offsetMin);
   const hours = Math.floor(absMin / 60).toString().padStart(2, "0");
-  const minutes = (absMin % 60).toString().padStart(2, "0");
+  const minutes = Math.floor(absMin % 60).toString().padStart(2, "0");
   return `UTC${sign}${hours}:${minutes}`;
 }
 
@@ -73,8 +73,7 @@ window.onload = function () {
 
     const headRow = document.createElement("tr");
     headRow.innerHTML = "<th>UTC</th>" + Object.entries(cities).map(([name, tz]) => {
-      const isDST = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" }).formatToParts(new Date()).some(p => p.type === "timeZoneName" && p.value.includes("DT"));
-const label = `${name}${isDST ? " *" : ""} (${getUTCOffsetLabel(tz)})`;
+      const label = `${name} (${getUTCOffsetLabel(tz)})`;
       return "<th class='" + (tz === baseZone ? "highlight" : "") + "'>" + label + "</th>";
     }).join("");
     tableHead.appendChild(headRow);
@@ -90,29 +89,7 @@ const label = `${name}${isDST ? " *" : ""} (${getUTCOffsetLabel(tz)})`;
           const local = window.dateFnsTz.utcToZonedTime(utcTime, tz);
           const hour = parseInt(window.dateFns.format(local, "HH"), 10);
           const isWorkHour = hour >= 8 && hour < 17;
-          
-      const nowUTC = new Date();
-      const utcHour = utcTime.getUTCHours();
-      const cellTime = window.dateFns.format(local, "HH:mm");
-      const minute = parseInt(window.dateFns.format(local, "mm"), 10);
-      const totalMins = hour * 60 + minute;
-
-      const isPast = utcTime.getTime() < nowUTC.getTime();
-      const isSleep = totalMins < 360 || totalMins >= 1320;
-      const isWork = totalMins >= 480 && totalMins < 1020;
-
-      let classes = [];
-      if (isPast) classes.push("past");
-      if (isSleep) {
-        classes.push("sleep");
-      } else if (isWork) {
-        classes.push("work");
-      } else {
-        classes.push("off");
-      }
-
-      return `<td class="${classes.join(" ")}">${cellTime}</td>`;
-    
+          return `<td class="${isWorkHour ? 'work-hour' : ''}">${window.dateFns.format(local, "HH:mm")}</td>`;
         }).join("");
       tableBody.appendChild(row);
     }
@@ -146,5 +123,5 @@ const label = `${name}${isDST ? " *" : ""} (${getUTCOffsetLabel(tz)})`;
     }
   };
 
-  setTimeout(renderDeleteButtons, 0);
+  renderDeleteButtons();
 };
