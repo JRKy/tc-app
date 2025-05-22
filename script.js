@@ -15,6 +15,9 @@ const cities = {
 };
 
 const timezoneSelect = document.getElementById("timezone");
+const addBtn = document.getElementById("add-city-btn");
+const customInput = document.getElementById("custom-city");
+let customCities = [];
 const tableHead = document.querySelector("#timezone-table thead");
 const tableBody = document.querySelector("#timezone-table tbody");
 
@@ -72,6 +75,26 @@ document.getElementById("download-pdf").onclick = () => {
 // Initial render
 timezoneSelect.value = "America/Denver";
 generateTable("America/Denver");
+
+  addBtn.onclick = () => {
+    const newCity = customInput.value.trim();
+    if (newCity && !Object.values(cities).includes(newCity) && !customCities.includes(newCity)) {
+      try {
+        new Intl.DateTimeFormat("en-US", { timeZone: newCity });
+        const cityName = newCity.split("/").pop().replace(/_/g, " ");
+        cities[cityName + " (Custom)"] = newCity;
+        customCities.push(newCity);
+        const opt = document.createElement("option");
+        opt.value = newCity;
+        opt.textContent = cityName + " (Custom)";
+        timezoneSelect.appendChild(opt);
+        generateTable(timezoneSelect.value);
+        customInput.value = "";
+      } catch (e) {
+        alert("Invalid time zone.");
+      }
+    }
+  };
 
 timezoneSelect.addEventListener("change", () => {
   generateTable(timezoneSelect.value);
