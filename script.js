@@ -16,12 +16,12 @@ let customCities = JSON.parse(localStorage.getItem("customCities") || "[]");
 
 function getUTCOffsetLabel(tz) {
   const now = new Date();
-  const zoned = window.dateFnsTz.utcToZonedTime(now, tz);
-  const offsetMin = (zoned.getTime() - now.getTime()) / 60000;
+  const local = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+  const offsetMin = Math.round((local - now) / 60000);
   const sign = offsetMin >= 0 ? "+" : "-";
   const absMin = Math.abs(offsetMin);
   const hours = Math.floor(absMin / 60).toString().padStart(2, "0");
-  const minutes = Math.floor(absMin % 60).toString().padStart(2, "0");
+  const minutes = (absMin % 60).toString().padStart(2, "0");
   return `UTC${sign}${hours}:${minutes}`;
 }
 
