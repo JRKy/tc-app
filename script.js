@@ -94,7 +94,32 @@ window.onload = function () {
 
       
     let cells = Object.values(cities).map(() => {
-      return '<td>TRACE</td>';
+      
+      const local = window.dateFnsTz.utcToZonedTime(utcTime, tz);
+      const localHour = parseInt(window.dateFns.format(local, "HH"), 10);
+      const localTimeStr = window.dateFns.format(local, "HH:mm");
+
+      const classes = [];
+
+      if (localHour < 6 || localHour >= 22) {
+        classes.push("sleep");
+      } else if (localHour >= 8 && localHour < 17) {
+        classes.push("work");
+      } else {
+        classes.push("off");
+      }
+
+      if (utcTime < nowUTCSlot) {
+        classes.push("past");
+      }
+
+      const localSlot = new Date(Math.round(local.getTime() / (30 * 60 * 1000)) * 30 * 60 * 1000);
+      if (tz === baseZone && Math.abs(localSlot.getTime() - nowLocalSlot.getTime()) < 1000) {
+        classes.push("now-cell");
+      }
+
+      return `<td class="${classes.join(" ")}">${localTimeStr}</td>`;
+    
     }).join("");
     row.innerHTML = `<td>${utcLabel}</td>` + cells;
      
