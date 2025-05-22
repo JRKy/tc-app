@@ -81,9 +81,17 @@ window.onload = function () {
     const baseDate = new Date();
     baseDate.setUTCHours(0, 0, 0, 0);
 
-    for (let i = 0; i < 48; i++) {
+    const currentUTC = new Date();
+  const nowHH = currentUTC.getUTCHours();
+  const nowMM = currentUTC.getUTCMinutes();
+  const nowSlot = Math.floor(nowHH * 2 + nowMM / 30);
+
+  for (let i = 0; i < 48; i++) {
       const utcTime = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
-      const row = document.createElement("tr");
+      
+    const row = document.createElement("tr");
+    if (i === nowSlot) row.classList.add("now-row");
+    
       row.innerHTML = `<td>${window.dateFns.format(utcTime, "HH:mm")}</td>` + 
         Object.values(cities).map(tz => {
           const local = window.dateFnsTz.utcToZonedTime(utcTime, tz);
@@ -91,7 +99,11 @@ window.onload = function () {
           const isWorkHour = hour >= 8 && hour < 17;
           return `<td class="${isWorkHour ? 'work-hour' : ''}">${window.dateFns.format(local, "HH:mm")}</td>`;
         }).join("");
-      tableBody.appendChild(row);
+      
+    const workCells = [...row.querySelectorAll("td")].filter(td => td.classList.contains("work"));
+    if (workCells.length >= 3 && !row.classList.contains("now-row")) row.classList.add("suggest-slot");
+    tableBody.appendChild(row);
+    
     }
   }
 
