@@ -81,3 +81,7 @@ td.work-hour {
     white-space: nowrap;
   }
 }
+
+.highlight {
+  background-color: #fff3cd;
+}
