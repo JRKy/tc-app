@@ -118,7 +118,7 @@ window.onload = function () {
         classes.push("now-cell");
       }
 
-      return `<td class="${classes.join(" ")}">${localTimeStr}</td>`;
+      return `<td class="${classes.join(" ")}">${localTimeStr} [${localHour}]</td>`;
     
     }).join("");
     row.innerHTML = `<td>${utcLabel}</td>` + cells;
