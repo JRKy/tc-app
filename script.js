@@ -136,7 +136,7 @@ window.onload = function () {
       
       const dateFnsType = typeof dateFns;
       const localStr = String(local);
-      return `<td>${localTimeStr} [${localHour}] type:${dateFnsType} local:${localStr}</td>`;
+      return `<td class="${classes.join(" ")}">${localTimeStr}</td>`;
     
     
     }).join("");
