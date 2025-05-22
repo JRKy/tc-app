@@ -49,7 +49,11 @@ window.onload = function () {
       row.innerHTML = `<td>${window.dateFns.format(baseTime, "HH:mm")}</td>` +
         Object.values(cities).map(tz => {
           const local = window.dateFnsTz.utcToZonedTime(time, tz);
-          return `<td>${window.dateFns.format(local, "HH:mm")}</td>`;
+          
+      const hour = parseInt(window.dateFns.format(local, "HH"), 10);
+      const isWorkHour = hour >= 8 && hour < 17;
+      return `<td class="${isWorkHour ? 'work-hour' : ''}">${window.dateFns.format(local, "HH:mm")}</td>`;
+    
         }).join("");
       tableBody.appendChild(row);
     }

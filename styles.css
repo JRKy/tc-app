@@ -51,3 +51,33 @@ body.dark th {
 body.dark td {
   border-color: #444;
 }
+
+/* Sticky header */
+table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Work hour banding */
+td.work-hour {
+  background-color: #e0f7fa;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  select, button, input {
+    width: 100%;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
