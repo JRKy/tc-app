@@ -93,7 +93,11 @@ window.onload = function () {
       if (Math.abs(utcTime.getTime() - nowUTCSlot.getTime()) < 1000) row.classList.add("now-row");
 
       row.innerHTML = `<td>${utcLabel}</td>` + 
-        Object.values(cities).map(tz => {
+        
+    Object.values(cities).map(tz => {
+      return `<td>TRACE</td>`;
+    }).join("")
+    
           const local = window.dateFnsTz.utcToZonedTime(utcTime, tz);
           const hour = parseInt(window.dateFns.format(local, "HH"), 10);
           return `<td>${window.dateFns.format(local, "HH:mm")}</td>`;
