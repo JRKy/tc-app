@@ -38,7 +38,7 @@ function generateTable(baseZone) {
   const baseDate = new Date();
   baseDate.setHours(0, 0, 0, 0);
 
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 48; i++) {
     const time = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
     const row = document.createElement("tr");
     const baseTime = window.dateFnsTz.utcToZonedTime(time, baseZone);
