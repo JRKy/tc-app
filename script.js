@@ -241,6 +241,7 @@ function addZone() {
     alert("Invalid time zone. Please select from the suggestions.");
     return;
   }
+  }
   if (!selectedZones.includes(zone)) {
     selectedZones.push(zone);
     input.value = "";
