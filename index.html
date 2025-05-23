@@ -1120,14 +1120,19 @@
       
       // Set default date to today
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById("input-date").value = today;
+      const dateInput = document.getElementById("input-date");
+      if (dateInput) dateInput.value = today;
       
       // Set default time to current hour
       const now = new Date();
       const currentTime = now.toTimeString().slice(0, 5);
-      document.getElementById("input-time").value = currentTime;
+      const timeInput = document.getElementById("input-time");
+      if (timeInput) timeInput.value = currentTime;
       
-      generateTable();
+      // Wait a bit for all elements to be ready, then generate table
+      setTimeout(() => {
+        generateTable();
+      }, 100);
 
       // Add PWA-specific styling if installed
       if (isStandalone()) {
