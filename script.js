@@ -86,3 +86,76 @@ function generateTable() {
 }
 
 window.onload = updateZoneDisplay;
+
+const ianaTimeZones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [];
+
+document.getElementById("zone-input").addEventListener("input", function() {
+  const input = this.value.toLowerCase();
+  const match = ianaTimeZones.find(z => z.toLowerCase().startsWith(input));
+  if (match) this.value = match;
+});
+
+function toggleDarkMode() {
+  const body = document.body;
+  body.classList.toggle("dark");
+  localStorage.setItem("theme", body.classList.contains("dark") ? "dark" : "light");
+}
+
+function applyTheme() {
+  const saved = localStorage.getItem("theme");
+  if (saved === "dark") document.body.classList.add("dark");
+}
+
+function generateTable() {
+  const dateStr = document.getElementById("input-date").value;
+  const timeStr = document.getElementById("input-time").value;
+  if (!dateStr || !timeStr) return alert("Please select both a date and time.");
+
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const [hour, minute] = timeStr.split(":").map(Number);
+  const startUTC = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+  const tableHead = document.querySelector("#timezone-table thead");
+  const tableBody = document.querySelector("#timezone-table tbody");
+  tableHead.innerHTML = "";
+  tableBody.innerHTML = "";
+
+  const headRow = document.createElement("tr");
+  headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
+    const label = new Intl.DateTimeFormat("en-US", {
+      timeZone: zone,
+      timeZoneName: "shortOffset"
+    }).formatToParts(new Date()).find(p => p.type === "timeZoneName")?.value || "";
+    return `<th>${zone} (${label.replace("GMT", "UTC")})</th>`;
+  }).join("");
+  tableHead.appendChild(headRow);
+
+  for (let i = 0; i < 48; i++) {
+    const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
+    const utcLabel = utcTime.toISOString().slice(11, 16);
+    const row = document.createElement("tr");
+    let cells = [`<td>${utcLabel}</td>`];
+    let workCount = 0;
+
+    selectedZones.forEach(zone => {
+      const local = utcToZonedTime(utcTime, zone);
+      const h = local.getHours();
+      const label = local.toTimeString().slice(0, 5);
+      const cls = (h >= 8 && h < 17) ? "work" : (h < 6 || h >= 22) ? "sleep" : "off";
+      if (cls === "work") workCount++;
+      cells.push(`<td class="${cls}">${label}</td>`);
+    });
+
+    if (workCount === selectedZones.length && selectedZones.length > 0) {
+      row.classList.add("now-cell");
+    }
+
+    row.innerHTML = cells.join("");
+    tableBody.appendChild(row);
+  }
+}
+
+window.onload = () => {
+  updateZoneDisplay();
+  applyTheme();
+};

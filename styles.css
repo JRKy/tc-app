@@ -72,3 +72,40 @@ th, td {
 tbody tr:nth-child(even) {
   background-color: #f1f3f5;
 }
+
+:root {
+  --bg: #f8f9fa;
+  --text: #212529;
+  --accent: #007bff;
+  --header-bg: #343a40;
+  --header-text: white;
+  --highlight: #d4edda;
+  --sleep: #dee2e6;
+  --off: #fef9e7;
+  --now: #ffeeba;
+}
+
+body.dark {
+  --bg: #121212;
+  --text: #e0e0e0;
+  --accent: #66b2ff;
+  --header-bg: #1f1f1f;
+  --header-text: #ffffff;
+  --highlight: #264d26;
+  --sleep: #2c2c2c;
+  --off: #3b2f1f;
+  --now: #4b3b00;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+thead {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+}
+td.work { background-color: var(--highlight); }
+td.sleep { background-color: var(--sleep); }
+td.off   { background-color: var(--off); }
+td.now-cell { background-color: var(--now); font-weight: bold; }
