@@ -146,3 +146,9 @@ th:first-child, td:first-child {
   border-top: 2px solid #28a745;
   border-bottom: 2px solid #28a745;
 }
+
+th.utc-header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  font-weight: bold;
+}

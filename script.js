@@ -75,7 +75,7 @@ function generateTable(autoTriggered = false) {
   tableBody.innerHTML = "";
 
   const headRow = document.createElement("tr");
-  headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
+  headRow.innerHTML = "<th class=\"utc-header\">UTC</th>" + selectedZones.map(zone => {
     
     const offsetDate = new Date();
     const formatter = new Intl.DateTimeFormat("en-US", {
@@ -111,7 +111,7 @@ function generateTable(autoTriggered = false) {
       cells.push(`<td class="${cls}">${label}</td>`);
     });
 
-    if (smartZones.length === selectedZones.length && selectedZones.length > 0) {
+    if (selectedZones.length > 1 && smartZones.length === selectedZones.length) {
       row.classList.add("smart-slot");
       row.classList.add("now-cell");
     }
