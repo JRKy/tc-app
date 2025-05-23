@@ -61,7 +61,7 @@ function exportPDF() {
 }
 
 function generateTable(autoTriggered = false) {
-    const dateStr = document.getElementById("input-date").value;
+  const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
   if (!dateStr || !timeStr) { if (!autoTriggered) alert("Please select both a date and time."); return; }
 
@@ -151,3 +151,65 @@ window.onload = () => {
 
 document.getElementById("input-date").addEventListener("change", generateTable);
 document.getElementById("input-time").addEventListener("change", generateTable);
+
+
+function generateTable(autoTriggered = false) {
+  const dateStr = document.getElementById("input-date").value;
+  const timeStr = document.getElementById("input-time").value;
+  if (!dateStr || !timeStr) {
+    if (!autoTriggered) alert("Please select both a date and time.");
+    return;
+  }
+
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const [hour, minute] = timeStr.split(":").map(Number);
+  const startUTC = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+  const tableHead = document.querySelector("#timezone-table thead");
+  const tableBody = document.querySelector("#timezone-table tbody");
+  tableHead.innerHTML = "";
+  tableBody.innerHTML = "";
+
+  const headRow = document.createElement("tr");
+  headRow.innerHTML = '<th class="utc-header">UTC</th>' + selectedZones.map(zone => {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: zone,
+      timeZoneName: "shortOffset"
+    });
+    const parts = formatter.formatToParts(now);
+    const offset = parts.find(p => p.type === "timeZoneName")?.value.replace("GMT", "UTC") || "";
+    const isDST = now.toLocaleTimeString("en-US", { timeZone: zone }).includes("Daylight");
+    return `<th>${zone} (${offset}${isDST ? "*" : ""})</th>`;
+  }).join("");
+  tableHead.appendChild(headRow);
+
+  for (let i = 0; i < 48; i++) {
+    const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
+    const utcHour = utcTime.getUTCHours();
+    const utcLabel = utcTime.toISOString().slice(11, 16);
+    const utcDay = utcTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+    let row = document.createElement("tr");
+    let smartZones = [];
+    const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
+    if (utcClass === "work") smartZones.push("__utc__");
+    row.innerHTML = `<td class="${utcClass}">${utcLabel}<br/><small>${utcDay}</small></td>`;
+
+    selectedZones.forEach(zone => {
+      const local = utcToZonedTime(utcTime, zone);
+      const localHour = local.getHours();
+      const localLabel = local.toTimeString().slice(0, 5);
+      const localDay = local.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const cls = (localHour >= 8 && localHour < 17) ? "work" : (localHour < 6 || localHour >= 22) ? "sleep" : "off";
+      if (cls === "work") smartZones.push(zone);
+      row.innerHTML += `<td class="${cls}">${localLabel}<br/><small>${localDay}</small></td>`;
+    });
+
+    if (smartZones.length === selectedZones.length + 1 && selectedZones.length > 0) {
+      row.classList.add("smart-slot");
+    }
+
+    tableBody.appendChild(row);
+  }
+}  // END generateTable
