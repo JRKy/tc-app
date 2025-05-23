@@ -1018,8 +1018,13 @@
         
         let datalist = document.getElementById("tz-list");
         if (datalist) {
-          datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}">`).join("");
+          datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}"></option>`).join("");
         }
+      });
+
+      // Add click handler for easy selection
+      zoneInputElement.addEventListener("focus", function() {
+        populateTimezoneList();
       });
     }
 
@@ -1136,7 +1141,10 @@
         console.log('Time input set');
       }
       
-              // Only generate table if we have all required elements
+              // Initialize timezone suggestions
+      populateTimezoneList();
+      
+      // Only generate table if we have all required elements
       const durationInput = document.getElementById("input-duration");
       if (dateInput && timeInput && durationInput) {
         console.log('All inputs found, generating table');
