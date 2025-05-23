@@ -109,10 +109,13 @@ function generateTable(autoTriggered = false) {
 
       const local = utcToZonedTime(utcTime, zone);
       const h = local.getHours();
-      const label = local.toTimeString().slice(0, 5);
+      
+    const label = local.toTimeString().slice(0, 5);
+    const dateLabel = local.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    
       const cls = (h >= 8 && h < 17) ? "work" : (h < 6 || h >= 22) ? "sleep" : "off";
       if (cls === "work") { workCount++; smartZones.push(zone); }
-      cells.push(`<td class="${cls}">${label}</td>`);
+      cells.push(`<td class="${cls}">${label}<br/><small>${dateLabel}</small></td>`);
     });
 
     if (selectedZones.length > 1 && smartZones.length === selectedZones.length) {
@@ -130,7 +133,6 @@ const ianaTimeZones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone'
 document.getElementById("zone-input").addEventListener("input", function() {
   const input = this.value.toLowerCase();
   const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
-  if (suggestions.length === 1 && suggestions[0].toLowerCase() === input) return;
   this.setAttribute("list", "tz-list");
   let datalist = document.getElementById("tz-list");
   if (!datalist) {
@@ -138,7 +140,7 @@ document.getElementById("zone-input").addEventListener("input", function() {
     datalist.id = "tz-list";
     document.body.appendChild(datalist);
   }
-  datalist.innerHTML = suggestions.slice(0, 10).map(z => `<option value="${z}">`).join("");
+  datalist.innerHTML = suggestions.slice(0, 20).map(z => `<option value="${z}">`).join("");
 });
 
 window.onload = () => {
