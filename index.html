@@ -1,20 +1,25 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Time Zone Meeting Planner</title>
+  <title>Time Zone Planner</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 </head>
 <body>
-  <h1>Time Zone Meeting Planner</h1>
+  <h1>Time Zone Planner</h1>
   <div class="controls">
-    <input id="zone-input" type="text" placeholder="Enter time zone (e.g. Europe/London)" />
+    <label>Date: <input type="date" id="input-date" /></label>
+    <label>Time (UTC): <input type="time" id="input-time" step="1800" /></label>
+    <label>Time Zone: <input id="zone-input" placeholder="e.g. America/Denver" /></label>
     <button onclick="addZone()">➕ Add</button>
+    <button onclick="generateTable()">Generate Table</button>
   </div>
+  <div id="selected-zones"></div>
   <table id="timezone-table">
-    <thead><tr><th>Time</th></tr></thead>
+    <thead><tr><th>UTC</th></tr></thead>
     <tbody></tbody>
   </table>
   <script src="script.js"></script>
