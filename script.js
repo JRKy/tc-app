@@ -61,7 +61,7 @@ function exportPDF() {
 }
 
 function generateTable(autoTriggered = false) {
-  const dateStr = document.getElementById("input-date").value;
+    const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
   if (!dateStr || !timeStr) { if (!autoTriggered) alert("Please select both a date and time."); return; }
 
