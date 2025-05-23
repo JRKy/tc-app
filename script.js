@@ -78,17 +78,17 @@ function renderZones() {
   const headRow = document.createElement("tr");
   
     headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
-      const offset = -1 * new Date().getTimezoneOffset();
+      const date = new Date();
       const formatter = new Intl.DateTimeFormat('en-US', {
         timeZone: zone,
         timeZoneName: 'shortOffset'
       });
-      const parts = formatter.formatToParts(new Date());
-      const offsetPart = parts.find(p => p.type === "timeZoneName");
-      const label = offsetPart ? offsetPart.value.replace("GMT", "UTC") : "";
-      return `<th>${zone} (${label}) <button onclick="removeZone('${zone}')">❌</button></th>`;
+      const parts = formatter.formatToParts(date);
+      const offsetPart = parts.find(p => p.type === 'timeZoneName');
+      const offsetLabel = offsetPart ? offsetPart.value.replace('GMT', 'UTC') : '';
+      return `<th>${zone} (${offsetLabel}) <button onclick="removeZone('${zone}')">❌</button></th>`;
     }).join("");
-
+    
     return `<th>${zone} <button onclick="removeZone('${zone}')">❌</button></th>`;
   }).join("");
   tableHead.appendChild(headRow);
@@ -109,8 +109,11 @@ function renderZones() {
       const local = utcToZonedTime(utcTime, zone);
       
     const localTimeStr = format(local, "HH:mm");
-    const dayShift = local.getUTCDate() - utcTime.getUTCDate();
-    const shiftMarker = dayShift === 1 ? " +1" : dayShift === -1 ? " -1" : "";
+    let shiftMarker = "";
+    const utcDay = utcTime.getUTCDate();
+    const localDay = local.getUTCDate();
+    if (localDay > utcDay) shiftMarker = " +1";
+    else if (localDay < utcDay) shiftMarker = " -1";
     
       const localHour = parseInt(format(local, "HH"), 10);
       const classes = [];
