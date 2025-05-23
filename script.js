@@ -250,3 +250,23 @@ document.addEventListener("DOMContentLoaded", function() {
     datalist.innerHTML = suggestions.slice(0, 20).map(z => `<option value="${z}">`).join("");
   });
 });
+
+
+function addZone() {
+  const input = document.getElementById("zone-input");
+  const zone = input.value.trim();
+  if (!zone || !ianaTimeZones.includes(zone)) {
+    alert("Invalid time zone. Please select from the suggestions.");
+    return;
+  }
+  if (!selectedZones.includes(zone)) {
+    selectedZones.push(zone);
+    input.value = "";
+    generateTable();
+  }
+}
+
+function removeZone(zone) {
+  selectedZones = selectedZones.filter(z => z !== zone);
+  generateTable();
+}
