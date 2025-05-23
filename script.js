@@ -100,7 +100,7 @@ function renderZones() {
       else classes.push("off");
       if (utcTime < nowUTCSlot) classes.push("past");
       const localSlot = new Date(Math.round(local.getTime() / (30 * 60 * 1000)) * 30 * 60 * 1000);
-      if (Math.abs(localSlot.getTime() - now.getTime()) < 30 * 60 * 1000 && zone === selectedZones[0]) {
+      if (Math.abs(localSlot.getTime() - now.getTime()) < 30 * 60 * 1000 ) {
         classes.push("now-cell");
       }
       return `<td class="${classes.join(" ")}">${localTimeStr}</td>`;
@@ -112,7 +112,7 @@ function renderZones() {
 function addZone() {
   const input = document.getElementById("zone-input");
   const zone = input.value.trim();
-  if (zone && !selectedZones.includes(zone)) {
+  if (zone && zone !== 'UTC' && !selectedZones.includes(zone)) {
     try {
       new Intl.DateTimeFormat("en-US", { timeZone: zone }).format(new Date());
       selectedZones.push(zone);
