@@ -76,10 +76,18 @@ function generateTable(autoTriggered = false) {
 
   const headRow = document.createElement("tr");
   headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
-    const label = new Intl.DateTimeFormat("en-US", {
+    
+    const offsetDate = new Date();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+
       timeZone: zone,
       timeZoneName: "shortOffset"
-    }).formatToParts(new Date()).find(p => p.type === "timeZoneName")?.value || "";
+    })
+    .formatToParts(offsetDate);
+    const offsetPart = formatter.find(p => p.type === "timeZoneName")?.value || "";
+    const isDST = offsetDate.toLocaleTimeString('en-US', { timeZone: zone }).includes("Daylight");
+    const label = offsetPart.replace("GMT", "UTC") + (isDST ? "*" : "")
+;
     return `<th>${zone} (${label.replace("GMT", "UTC")})</th>`;
   }).join("");
   tableHead.appendChild(headRow);
