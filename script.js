@@ -1,5 +1,5 @@
 
-let selectedZones = JSON.parse(localStorage.getItem("zones") || '["America/Denver", "Asia/Tokyo"]');
+let selectedZones = JSON.parse(localStorage.getItem("zones") || "[]");
 
 function updateZoneDisplay() {
   const container = document.getElementById("selected-zones");
