@@ -947,6 +947,16 @@ function generateTable() {
       }
     });
 
+    // Check if this is a smart slot (all timezones are in work hours)
+    const isSmartSlot = cells.every((cell, index) => {
+      if (index === 0) return true; // Skip event time column
+      return cell.includes('class="time-cell work"');
+    });
+
+    if (isSmartSlot) {
+      row.classList.add('smart-slot');
+    }
+
     row.innerHTML = cells.join("");
     tableBody.appendChild(row);
   }
