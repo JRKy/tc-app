@@ -1,12 +1,12 @@
-# TimeSync - Global Time Zone Planner
+# TimeSync - Global Event Planner
 
-A modern, responsive PWA for planning meetings across time zones with confidence.
+A modern, responsive PWA for planning events across time zones with confidence.
 
 ## ✨ Features
 
-- 🌍 **Smart Time Zone Planning** - Compare times across multiple zones
+- 🌍 **Event-Centric Planning** - Set your event time and location, see how it appears globally
 - ⏰ **Flexible Time Frames** - Choose from 2-24 hour windows  
-- 🎯 **Optimal Meeting Detection** - Highlights best times for all participants
+- 🎯 **Smart Time Detection** - Highlights optimal times for all viewers
 - 📱 **Progressive Web App** - Install on desktop and mobile
 - 🌙 **Dark Mode Support** - Easy on the eyes
 - 🖨️ **Print-Friendly** - Clean export for sharing
@@ -14,11 +14,10 @@ A modern, responsive PWA for planning meetings across time zones with confidence
 
 ## 🚀 Quick Start
 
-1. **Open**: Visit the live app or open `index.html`
-2. **Set Date & Time**: Choose your meeting date and start time (UTC)
-3. **Select Duration**: Pick your meeting time frame (2-24 hours)
-4. **Add Time Zones**: Add locations for all participants
-5. **Find Perfect Time**: Look for ✨ highlighted optimal slots
+1. **Set Event Details**: Choose date, time, and timezone for your event
+2. **Add Viewer Locations**: Add time zones where people will be viewing
+3. **See Global Times**: Event timezone appears first, then viewer times
+4. **Find Optimal Slots**: Look for ✨ highlighted times when everyone's awake
 
 ## 📱 Installation
 
@@ -52,16 +51,25 @@ npx serve .
 
 ## 🎯 Usage Examples
 
-### Planning a Global Team Meeting
-1. Set date to next Monday
-2. Choose 4-hour duration starting at 14:00 UTC
-3. Add zones: `America/New_York`, `Europe/London`, `Asia/Singapore`
-4. Find the ✨ highlighted slots where everyone is awake!
+### Planning a Global Product Launch
+1. Set event: "March 15, 2:00 PM in New York"
+2. Add viewer zones: London, Tokyo, Sydney
+3. See how 2 PM NYC = 7 PM London = 4 AM Tokyo = 6 AM Sydney
+4. Find better time that works for more people
 
-### Quick Client Check-in
-1. Use 2-hour duration for focused planning
-2. Add client's time zone and yours
-3. Export or share the clean schedule
+### Scheduling a Team Call
+1. Set event: "Tomorrow, 10:00 AM in Denver" 
+2. Add team locations: Toronto, Berlin, Mumbai
+3. Get instant visibility of local times for everyone
+4. Export clean schedule to share
+
+## 🆕 What's New in v3.0
+
+- **Event-centric design** - Plan from the event's perspective
+- **Automatic time sync** - All times calculated from the event's timezone
+- **Viewer-focused display** - See how your event appears to different audiences
+- **Enhanced mobile experience** - Touch-optimized for all devices
+- **Improved timezone handling** - More reliable time calculations
 
 ## 🤝 Contributing
 
@@ -70,15 +78,6 @@ npx serve .
 3. Make your changes
 4. Test across browsers
 5. Submit a pull request
-
-## 🆕 What's New in v2.0
-
-- Complete UI/UX redesign with modern aesthetics
-- Customizable time frames instead of full-day view
-- PWA support with offline functionality
-- Touch-optimized mobile interface
-- Smart meeting time detection with visual highlights
-- Embedded styles and scripts for single-file simplicity
 
 ## 📄 License
 
