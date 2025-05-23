@@ -1024,13 +1024,6 @@
     `;
     document.head.appendChild(toastStyles);
 
-    // Initialize time zone suggestions
-    const ianaTimeZones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [
-      'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
-      'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Asia/Tokyo', 'Asia/Shanghai',
-      'Australia/Sydney', 'Pacific/Auckland'
-    ];
-
     const zoneInputElement = document.getElementById("zone-input");
     if (zoneInputElement) {
       zoneInputElement.addEventListener("input", function() {
