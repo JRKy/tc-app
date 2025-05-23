@@ -234,24 +234,6 @@ window.onload = () => {
 }  // END generateTable
 
 
-
-document.addEventListener("DOMContentLoaded", function() {
-  const input = document.getElementById("zone-input");
-  input.addEventListener("input", function() {
-    const inputVal = this.value.toLowerCase();
-    const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(inputVal));
-    this.setAttribute("list", "tz-list");
-    let datalist = document.getElementById("tz-list");
-    if (!datalist) {
-      datalist = document.createElement("datalist");
-      datalist.id = "tz-list";
-      document.body.appendChild(datalist);
-    }
-    datalist.innerHTML = suggestions.slice(0, 20).map(z => `<option value="${z}">`).join("");
-  });
-});
-
-
 function addZone() {
   const input = document.getElementById("zone-input");
   const zone = input.value.trim();
@@ -270,3 +252,23 @@ function removeZone(zone) {
   selectedZones = selectedZones.filter(z => z !== zone);
   generateTable();
 }
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const input = document.getElementById("zone-input");
+  if (!input) return;
+  input.addEventListener("input", function () {
+    const inputVal = this.value.toLowerCase();
+    const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(inputVal));
+    let datalist = document.getElementById("tz-list");
+    if (!datalist) {
+      datalist = document.createElement("datalist");
+      datalist.id = "tz-list";
+      document.body.appendChild(datalist);
+    }
+    datalist.innerHTML = suggestions
+      .slice(0, 20)
+      .map(z => `<option value="${z}">`)
+      .join("");
+  });
+});
