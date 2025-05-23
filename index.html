@@ -21,7 +21,7 @@
 <div class="controls">
     <label>Date: <input type="date" id="input-date" /></label>
     <label>Time (UTC): <input type="time" id="input-time" step="1800" /></label>
-    <label>Time Zone: <input id="zone-input" placeholder="e.g. America/Denver" /></label>
+    <label>Time Zone: <input id="zone-input" list="tz-list" placeholder="e.g. America/Denver" /></label>
     <button onclick="addZone()">➕ Add</button>
     
   </div>
@@ -41,5 +41,6 @@
     <tbody></tbody>
   </table>
   <script src="script.js"></script>
+  <datalist id="tz-list"></datalist>
 </body>
 </html>
