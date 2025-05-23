@@ -912,7 +912,12 @@ function generateTable() {
     const eventClass = (eventHour >= 8 && eventHour < 17) ? "work" : 
                       (eventHour < 6 || eventHour >= 22) ? "sleep" : "off";
     
-    cells.push(`<td class="time-cell ${eventClass}" style="font-weight: bold; border-left: 4px solid #667eea;">${eventLabel}<br><small>${eventDay}</small></td>`);
+    // Use the original input time for the first slot, then increment by 30 minutes
+    const baseTime = new Date(`${dateStr}T${timeStr}`);
+    const slotTime = new Date(baseTime.getTime() + i * 30 * 60 * 1000);
+    const displayTime = slotTime.toTimeString().slice(0, 5);
+    
+    cells.push(`<td class="time-cell ${eventClass}" style="font-weight: bold; border-left: 4px solid #667eea;">${displayTime}<br><small>${eventDay}</small></td>`);
 
     // VIEWER CELLS
     selectedZones.forEach(zone => {
