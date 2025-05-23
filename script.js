@@ -63,7 +63,7 @@ function exportPDF() {
 function generateTable(autoTriggered = false) {
   const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
-  if (!dateStr || !timeStr) return alert("Please select both a date and time.");
+  if (!dateStr || !timeStr) { if (!autoTriggered) alert("Please select both a date and time."); return; }
 
   const [year, month, day] = dateStr.split("-").map(Number);
   const [hour, minute] = timeStr.split(":").map(Number);
@@ -75,7 +75,7 @@ function generateTable(autoTriggered = false) {
   tableBody.innerHTML = "";
 
   const headRow = document.createElement("tr");
-  headRow.innerHTML = "<th><strong>UTC</strong></th>" + selectedZones.map(zone => {
+  headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
     const label = new Intl.DateTimeFormat("en-US", {
       timeZone: zone,
       timeZoneName: "shortOffset"
