@@ -514,7 +514,7 @@
   <div class="app-container">
     <header class="header">
       <h1>⏰ TimeSync</h1>
-      <p>Plan meetings across time zones with confidence</p>
+      <p>Plan events across time zones with confidence</p>
     </header>
 
     <div class="main-card">
@@ -533,17 +533,28 @@
       <div class="controls">
         <div class="controls-grid">
           <div class="input-group">
-            <label for="input-date">Meeting Date</label>
+            <label for="input-date">Event Date</label>
             <input type="date" id="input-date" class="input-field" />
           </div>
           
           <div class="input-group">
-            <label for="input-time">Start Time (UTC)</label>
+            <label for="input-time">Event Time</label>
             <input type="time" id="input-time" class="input-field" step="1800" />
           </div>
 
           <div class="input-group">
-            <label for="input-duration">Time Frame</label>
+            <label for="event-timezone">Event Time Zone</label>
+            <input 
+              id="event-timezone" 
+              class="input-field" 
+              list="event-tz-list" 
+              placeholder="e.g., America/New_York"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="input-duration">Duration</label>
             <select id="input-duration" class="input-field">
               <option value="2">2 hours (4 slots)</option>
               <option value="4" selected>4 hours (8 slots)</option>
@@ -553,26 +564,26 @@
               <option value="24">Full day (48 slots)</option>
             </select>
           </div>
-          
-          <div class="input-group">
-            <label for="zone-input">Add Time Zone</label>
-            <div class="timezone-input-wrapper">
-              <input 
-                id="zone-input" 
-                class="input-field" 
-                list="tz-list" 
-                placeholder="e.g., America/New_York"
-                autocomplete="off"
-              />
-              <button class="add-zone-btn" onclick="addZone()">
-                ➕ Add
-              </button>
-            </div>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 2rem;">
+          <label for="zone-input">Add Viewer Time Zones</label>
+          <div class="timezone-input-wrapper">
+            <input 
+              id="zone-input" 
+              class="input-field" 
+              list="tz-list" 
+              placeholder="Add locations of people viewing this event"
+              autocomplete="off"
+            />
+            <button class="add-zone-btn" onclick="addZone()">
+              ➕ Add
+            </button>
           </div>
         </div>
 
         <div class="selected-zones" id="selected-zones-container" style="display: none;">
-          <h3>Selected Time Zones</h3>
+          <h3>Viewer Time Zones</h3>
           <div class="zone-chips" id="selected-zones"></div>
         </div>
 
@@ -580,7 +591,7 @@
           <div class="legend-item work">💼 Work Hours (8AM - 5PM)</div>
           <div class="legend-item sleep">🌙 Sleep Hours (10PM - 6AM)</div>
           <div class="legend-item off">🕐 Off Hours</div>
-          <div class="legend-item smart">✨ Optimal Meeting Time</div>
+          <div class="legend-item smart">✨ Optimal Event Time</div>
           <div class="legend-item">💡 * indicates Daylight Saving Time</div>
         </div>
       </div>
@@ -588,8 +599,8 @@
       <div class="table-container">
         <div id="empty-state" class="empty-state">
           <div class="icon">🌍</div>
-          <h3>Ready to plan your global meeting?</h3>
-          <p>Select a date, start time, duration, and add some time zones to get started</p>
+          <h3>Ready to plan your global event?</h3>
+          <p>Set your event date, time, and timezone, then add viewer locations to see when it occurs for everyone</p>
         </div>
         
         <table id="timezone-table" style="display: none;">
@@ -601,6 +612,7 @@
   </div>
 
   <datalist id="tz-list"></datalist>
+  <datalist id="event-tz-list"></datalist>
 
   <script>
     // In-memory storage for the artifact environment
@@ -624,6 +636,7 @@
 
     // Initialize time zone suggestions
     const ianaTimeZones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [
+      'UTC', // Put UTC first as it's now selectable
       'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
       'America/Toronto', 'America/Vancouver', 'America/Mexico_City', 'America/Sao_Paulo',
       'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Rome', 'Europe/Madrid',
@@ -635,10 +648,22 @@
       'Africa/Cairo', 'Africa/Lagos', 'Africa/Johannesburg', 'Africa/Nairobi'
     ];
 
+    // Add UTC to the beginning if it's not already there (for browsers with full support)
+    if (ianaTimeZones[0] !== 'UTC' && !ianaTimeZones.includes('UTC')) {
+      ianaTimeZones.unshift('UTC');
+    }
+
     function populateTimezoneList() {
       const datalist = document.getElementById("tz-list");
+      const eventDatalist = document.getElementById("event-tz-list");
+      
+      const options = ianaTimeZones.slice(0, 20).map(z => `<option value="${z}"></option>`).join("");
+      
       if (datalist) {
-        datalist.innerHTML = ianaTimeZones.slice(0, 20).map(z => `<option value="${z}"></option>`).join("");
+        datalist.innerHTML = options;
+      }
+      if (eventDatalist) {
+        eventDatalist.innerHTML = options;
       }
     }
 
@@ -705,21 +730,28 @@
             word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
           ).join('_')
         ).join('/'),
-        zone === 'EST' ? 'America/New_York' : zone,
-        zone === 'PST' ? 'America/Los_Angeles' : zone,
-        zone === 'MST' ? 'America/Denver' : zone,
-        zone === 'CST' ? 'America/Chicago' : zone,
-        zone === 'GMT' ? 'Europe/London' : zone,
-        zone === 'UTC' ? 'UTC' : zone
+        zone.toUpperCase() === 'EST' ? 'America/New_York' : zone,
+        zone.toUpperCase() === 'PST' ? 'America/Los_Angeles' : zone,
+        zone.toUpperCase() === 'MST' ? 'America/Denver' : zone,
+        zone.toUpperCase() === 'CST' ? 'America/Chicago' : zone,
+        zone.toUpperCase() === 'GMT' ? 'Europe/London' : zone,
+        zone.toUpperCase() === 'UTC' ? 'UTC' : zone
       ];
       
       let validZone = null;
       for (const testZone of zonesToTry) {
         try {
-          new Intl.DateTimeFormat("en-US", { timeZone: testZone }).format(new Date());
-          validZone = testZone;
-          console.log(`Valid time zone found: ${testZone}`);
-          break;
+          if (testZone === 'UTC') {
+            // UTC is always valid
+            validZone = 'UTC';
+            console.log(`Valid time zone found: UTC`);
+            break;
+          } else {
+            new Intl.DateTimeFormat("en-US", { timeZone: testZone }).format(new Date());
+            validZone = testZone;
+            console.log(`Valid time zone found: ${testZone}`);
+            break;
+          }
         } catch (e) {
           console.log(`Invalid time zone: ${testZone}`);
         }
@@ -786,15 +818,32 @@
       const timeStr = timeInput.value;
       const durationHours = parseInt(durationInput.value || "4");
       
+      // Convert local time input to UTC for calculations
+      const localTimeToUTC = (localTimeStr, dateStr) => {
+        if (!localTimeStr || !dateStr) return null;
+        
+        const [year, month, day] = dateStr.split("-").map(Number);
+        const [hours, minutes] = localTimeStr.split(":").map(Number);
+        
+        // Create date in user's local timezone
+        const localDate = new Date(year, month - 1, day, hours, minutes);
+        
+        // Return UTC equivalent
+        return new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+      };
+      
+      const startUTC = localTimeToUTC(timeStr, dateStr);
+      
       console.log('Input values:', {
         dateStr,
-        timeStr,
+        timeStr: `${timeStr} (local)`,
+        startUTC: startUTC ? startUTC.toISOString().slice(11, 16) + ' (UTC)' : 'invalid',
         durationHours,
         selectedZonesCount: selectedZones.length,
         selectedZones: selectedZones
       });
       
-      if (!dateStr || !timeStr || selectedZones.length === 0) {
+      if (!dateStr || !timeStr || !startUTC || selectedZones.length === 0) {
         console.log('Showing empty state - missing date/time or no zones selected');
         table.style.display = 'none';
         emptyState.style.display = 'block';
@@ -806,9 +855,6 @@
       table.style.display = 'table';
       emptyState.style.display = 'none';
 
-      const [year, month, day] = dateStr.split("-").map(Number);
-      const [hour, minute] = timeStr.split(":").map(Number);
-      const startUTC = new Date(Date.UTC(year, month - 1, day, hour, minute));
       console.log('Start UTC time:', startUTC);
 
       const tableHead = document.querySelector("#timezone-table thead");
@@ -822,26 +868,34 @@
       tableHead.innerHTML = "";
       tableBody.innerHTML = "";
 
-      // Create header
+      // Create header - only show selected time zones
       const headRow = document.createElement("tr");
-      let headerContent = "<th>UTC Time</th>";
+      let headerContent = "";
       
       selectedZones.forEach(zone => {
         const offsetDate = new Date();
-        const formatter = new Intl.DateTimeFormat("en-US", {
-          timeZone: zone,
-          timeZoneName: "shortOffset"
-        }).formatToParts(offsetDate);
-        const offsetPart = formatter.find(p => p.type === "timeZoneName")?.value || "";
+        let label = "";
+        let displayName = "";
         
-        const jan = new Date(startUTC.getFullYear(), 0, 1);
-        const jul = new Date(startUTC.getFullYear(), 6, 1);
-        const janOffset = jan.getTimezoneOffset();
-        const julOffset = jul.getTimezoneOffset();
-        const isDST = Math.max(janOffset, julOffset) !== offsetDate.getTimezoneOffset();
-        
-        const label = offsetPart.replace("GMT", "UTC") + (isDST ? "*" : "");
-        const displayName = zone.split('/').pop().replace('_', ' ');
+        if (zone === "UTC") {
+          label = "UTC";
+          displayName = "UTC";
+        } else {
+          const formatter = new Intl.DateTimeFormat("en-US", {
+            timeZone: zone,
+            timeZoneName: "shortOffset"
+          }).formatToParts(offsetDate);
+          const offsetPart = formatter.find(p => p.type === "timeZoneName")?.value || "";
+          
+          const jan = new Date(startUTC.getFullYear(), 0, 1);
+          const jul = new Date(startUTC.getFullYear(), 6, 1);
+          const janOffset = jan.getTimezoneOffset();
+          const julOffset = jul.getTimezoneOffset();
+          const isDST = Math.max(janOffset, julOffset) !== offsetDate.getTimezoneOffset();
+          
+          label = offsetPart.replace("GMT", "UTC") + (isDST ? "*" : "");
+          displayName = zone.split('/').pop().replace('_', ' ');
+        }
         
         headerContent += `<th>${displayName}<br><small>${label}</small></th>`;
       });
@@ -866,38 +920,39 @@
         
         const row = document.createElement("tr");
         let smartZones = [];
-        
-        const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : 
-                        (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
-        
-        // Include UTC in the optimal meeting calculation
-        if (utcClass === "work") {
-          smartZones.push("UTC");
-        }
-        
-        let cells = [`<td class="time-cell ${utcClass}">${utcLabel}<br><small>${utcDay}</small></td>`];
+        let cells = [];
 
         selectedZones.forEach(zone => {
-          const local = utcToZonedTime(utcTime, zone);
-          const localHour = local.getHours();
-          const localLabel = local.toTimeString().slice(0, 5);
-          const localDay = local.toLocaleDateString('en-US', { 
-            weekday: 'short', 
-            month: 'short', 
-            day: 'numeric' 
-          });
-          
-          const cls = (localHour >= 8 && localHour < 17) ? "work" : 
-                      (localHour < 6 || localHour >= 22) ? "sleep" : "off";
-          
-          if (cls === "work") smartZones.push(zone);
-          
-          cells.push(`<td class="time-cell ${cls}">${localLabel}<br><small>${localDay}</small></td>`);
+          if (zone === "UTC") {
+            // Handle UTC specially
+            const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : 
+                            (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
+            
+            if (utcClass === "work") smartZones.push(zone);
+            
+            cells.push(`<td class="time-cell ${utcClass}">${utcLabel}<br><small>${utcDay}</small></td>`);
+          } else {
+            // Handle regular time zones
+            const local = utcToZonedTime(utcTime, zone);
+            const localHour = local.getHours();
+            const localLabel = local.toTimeString().slice(0, 5);
+            const localDay = local.toLocaleDateString('en-US', { 
+              weekday: 'short', 
+              month: 'short', 
+              day: 'numeric' 
+            });
+            
+            const cls = (localHour >= 8 && localHour < 17) ? "work" : 
+                        (localHour < 6 || localHour >= 22) ? "sleep" : "off";
+            
+            if (cls === "work") smartZones.push(zone);
+            
+            cells.push(`<td class="time-cell ${cls}">${localLabel}<br><small>${localDay}</small></td>`);
+          }
         });
 
-        // Highlight as optimal if ALL zones (including UTC) are in work hours
-        const totalZones = selectedZones.length + 1; // +1 for UTC
-        if (smartZones.length === totalZones) {
+        // Highlight as optimal if ALL selected zones are in work hours
+        if (selectedZones.length > 1 && smartZones.length === selectedZones.length) {
           row.classList.add("smart-slot");
         }
 
