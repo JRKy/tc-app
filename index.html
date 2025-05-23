@@ -10,7 +10,8 @@
 </head>
 <body>
   <h1>Time Zone Planner</h1>
-  <button onclick="toggleDarkMode()">🌗 Toggle Dark Mode</button>
+  <button class="toggle-mode" onclick="toggleDarkMode()">🌗 Toggle Dark Mode</button>
+<button class="toggle-mode" onclick="exportPDF()">📄 Export PDF</button>
 <div class="controls">
     <label>Date: <input type="date" id="input-date" /></label>
     <label>Time (UTC): <input type="time" id="input-time" step="1800" /></label>
@@ -19,7 +20,16 @@
     <button onclick="generateTable()">Generate Table</button>
   </div>
   <div id="selected-zones"></div>
-  <table id="timezone-table">
+  
+<div class="legend">
+  <strong>Legend:</strong>
+  <span class="legend-item work">💼 Work Hours</span>
+  <span class="legend-item sleep">🌙 Sleep Hours</span>
+  <span class="legend-item off">🕓 Off Hours</span>
+  <span class="legend-item smart">✅ Smart Meeting Slot</span>
+</div>
+
+<table id="timezone-table">
     <thead><tr><th>UTC</th></tr></thead>
     <tbody></tbody>
   </table>

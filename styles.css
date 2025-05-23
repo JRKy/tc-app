@@ -109,3 +109,33 @@ td.work { background-color: var(--highlight); }
 td.sleep { background-color: var(--sleep); }
 td.off   { background-color: var(--off); }
 td.now-cell { background-color: var(--now); font-weight: bold; }
+
+.legend {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.legend-item {
+  margin: 0 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.legend-item.work { background-color: var(--highlight); }
+.legend-item.sleep { background-color: var(--sleep); }
+.legend-item.off { background-color: var(--off); }
+.legend-item.smart { background-color: var(--now); }
+button.toggle-mode {
+  margin-bottom: 1rem;
+  background-color: var(--accent);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  font-weight: bold;
+}
+th:first-child, td:first-child {
+  position: sticky;
+  left: 0;
+  background-color: var(--bg);
+  z-index: 1;
+}

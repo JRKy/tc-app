@@ -89,7 +89,22 @@ window.onload = updateZoneDisplay;
 
 const ianaTimeZones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [];
 
-document.getElementById("zone-input").addEventListener("input", function() {
+
+const zoneInput = document.getElementById("zone-input");
+zoneInput.addEventListener("input", function() {
+  const input = this.value.toLowerCase();
+  const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+  if (suggestions.length === 1 && suggestions[0].toLowerCase() === input) return;
+  this.setAttribute("list", "tz-list");
+  let datalist = document.getElementById("tz-list");
+  if (!datalist) {
+    datalist = document.createElement("datalist");
+    datalist.id = "tz-list";
+    document.body.appendChild(datalist);
+  }
+  datalist.innerHTML = suggestions.slice(0, 10).map(z => `<option value="${z}">`).join("");
+});
+
   const input = this.value.toLowerCase();
   const match = ianaTimeZones.find(z => z.toLowerCase().startsWith(input));
   if (match) this.value = match;
@@ -159,3 +174,8 @@ window.onload = () => {
   updateZoneDisplay();
   applyTheme();
 };
+
+// PDF export (placeholder)
+function exportPDF() {
+  window.print();
+}
