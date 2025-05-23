@@ -21,6 +21,9 @@ function renderZones() {
   headRow.innerHTML = "<th>Time</th>";
   body.innerHTML = "";
 
+  const now = new Date();
+  const nowUTCSlot = new Date(Math.round(now.getTime() / (30 * 60 * 1000)) * 30 * 60 * 1000);
+
   selectedZones.forEach(zone => {
     const th = document.createElement("th");
     th.innerHTML = zone.replace("_", " ") + 
@@ -33,12 +36,38 @@ function renderZones() {
 
   for (let i = 0; i < 48; i++) {
     const row = document.createElement("tr");
-    const timeSlot = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
-    const label = format(timeSlot, "HH:mm");
-    row.innerHTML = `<td>${label}</td>` + selectedZones.map(zone => {
-      const local = utcToZonedTime(timeSlot, zone);
+    const utcTime = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
+    const utcLabel = format(utcTime, "HH:mm");
+
+    if (Math.abs(utcTime.getTime() - nowUTCSlot.getTime()) < 1000) {
+      row.classList.add("now-row");
+    }
+
+    row.innerHTML = `<td>${utcLabel}</td>` + selectedZones.map(zone => {
+      const local = utcToZonedTime(utcTime, zone);
       const localTime = format(local, "HH:mm");
-      return `<td>${localTime}</td>`;
+      const localHour = parseInt(format(local, "HH"));
+      const classes = [];
+
+      if (localHour < 6 || localHour >= 22) {
+        classes.push("sleep");
+      } else if (localHour >= 8 && localHour < 17) {
+        classes.push("work");
+      } else {
+        classes.push("off");
+      }
+
+      if (utcTime.getTime() < nowUTCSlot.getTime()) {
+        classes.push("past");
+      }
+
+      const localSlot = new Date(Math.round(local.getTime() / (30 * 60 * 1000)) * 30 * 60 * 1000);
+      if (Math.abs(localSlot.getTime() - now.getTime()) < 30 * 60 * 1000 &&
+          zone === selectedZones[0]) {
+        classes.push("now-cell");
+      }
+
+      return `<td class="${classes.join(" ")}">${localTime}</td>`;
     }).join("");
     body.appendChild(row);
   }

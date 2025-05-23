@@ -17,6 +17,28 @@ th, td {
   padding: 0.5rem;
   border: 1px solid #ccc;
 }
+tr.now-row td {
+  background-color: #e1f5fe;
+  font-weight: bold;
+  border-top: 2px solid #2196f3;
+  border-bottom: 2px solid #2196f3;
+}
+td.past {
+  background-color: #f0f0f0;
+}
+td.sleep {
+  background-color: #d0e3ff;
+}
+td.work {
+  background-color: #d4edda;
+}
+td.off {
+  background-color: #fff8dc;
+}
+td.now-cell {
+  font-weight: bold;
+  border: 2px solid #2196f3;
+}
 input {
   padding: 0.4rem;
 }
