@@ -254,21 +254,29 @@ function removeZone(zone) {
 }
 
 
+
 document.addEventListener("DOMContentLoaded", function () {
   const input = document.getElementById("zone-input");
   if (!input) return;
+
   input.addEventListener("input", function () {
     const inputVal = this.value.toLowerCase();
     const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(inputVal));
+
     let datalist = document.getElementById("tz-list");
     if (!datalist) {
       datalist = document.createElement("datalist");
       datalist.id = "tz-list";
       document.body.appendChild(datalist);
     }
-    datalist.innerHTML = suggestions
+
+    const optionsHTML = suggestions
       .slice(0, 20)
-      .map(z => `<option value="${z}">`)
+      .map(function (z) {
+        return `<option value="${z}">`;
+      })
       .join("");
+
+    datalist.innerHTML = optionsHTML;
   });
 });
