@@ -1,6 +1,40 @@
-# TimeSync - Global Event Planner
+# TimeSync
 
-A modern, responsive PWA for planning events across time zones with confidence.
+A modern, accessible time zone event planner web app.
+
+## Features
+
+- **Modern UI/UX**: Material-inspired design with consistent use of Google Material Icons.
+- **Accessibility**: ARIA roles, labels, skip links, focus styles, and semantic HTML structure.
+- **Time Zone Management**: Add and remove time zones with smart validation.
+- **Table Generation**: Generate a table with correct time slot highlighting for work, sleep, and off hours.
+- **Export Options**: Copy table as plain text and add events to Google, Outlook, and Apple Calendar.
+- **Theme Toggle**: Switch between light and dark themes.
+
+## Getting Started
+
+1. Clone the repository.
+2. Open `index.html` in your browser.
+3. Start planning your events!
+
+## Development
+
+- **Debug Logs**: Debug logs have been removed for a cleaner console output.
+- **Cache Control**: A custom Python server script is available to serve files with cache control headers disabled for development.
+
+## Changelog
+
+### Latest Changes
+- Removed debug console logs for cleaner output.
+- Added 'Copy Table' button to export table as plain text.
+- Integrated calendar buttons for Google, Outlook, and Apple Calendar.
+- Improved theme toggle for better accessibility and clarity.
+
+### Previous Changes
+- Refactored CSS and HTML for a modern, Material-inspired look.
+- Updated all time displays and helper text to use 24-hour format.
+- Enhanced accessibility with ARIA roles, labels, skip links, focus styles, and semantic HTML structure.
+- Implemented a modular code structure, splitting logic into config.js, storage.js, timezone.js, ui.js, and table.js.
 
 ## ✨ Features
 
