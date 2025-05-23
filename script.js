@@ -61,9 +61,7 @@ function exportPDF() {
 }
 
 function generateTable(autoTriggered = false) {
-  const cb = document.getElementById("include-utc");
-  const showUTC = cb && cb.checked === true;
-    const dateStr = document.getElementById("input-date").value;
+      const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
   if (!dateStr || !timeStr) { if (!autoTriggered) alert("Please select both a date and time."); return; }
 
@@ -158,22 +156,7 @@ window.onload = () => {
 
   setTimeout(() => generateTable(true), 10); 
   const waitForControls = setInterval(() => {
-    const cb = document.getElementById("include-utc");
-    if (cb) {
-      clearInterval(waitForControls);
-      try { generateTable(true); } catch(e) { console.warn('Table gen skipped:', e); }
-    }
-  }, 50);
-};
-
-document.getElementById("input-date").addEventListener("change", generateTable);
-document.getElementById("input-time").addEventListener("change", generateTable);
-
-
-function generateTable(autoTriggered = false) {
-  const cb = document.getElementById("include-utc");
-  const showUTC = cb && cb.checked === true;
-    const dateStr = document.getElementById("input-date").value;
+        const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
   if (!dateStr || !timeStr) {
     if (!autoTriggered) alert("Please select both a date and time.");
@@ -229,7 +212,7 @@ function generateTable(autoTriggered = false) {
     if (showUTC && utcClass === "work") smartZones.push("__utc__");
 
     
-    if (showUTC) row.innerHTML = `<td class="${utcClass}">${utcLabel}<br/><small>${utcDay}</small></td>`;
+    
 
 
     selectedZones.forEach(zone => {
