@@ -149,6 +149,7 @@ document.getElementById("zone-input").addEventListener("input", function() {
 });
 
 window.onload = () => {
+  applyTheme();
   updateZoneDisplay();
   generateTable(true);
   applyTheme();
@@ -188,7 +189,15 @@ function generateTable(autoTriggered = false) {
     });
     const parts = formatter.formatToParts(now);
     const offset = parts.find(p => p.type === "timeZoneName")?.value.replace("GMT", "UTC") || "";
-    const isDST = now.toLocaleTimeString("en-US", { timeZone: zone }).includes("Daylight");
+    
+    const jan = new Date(now.getFullYear(), 0, 1);
+    const jul = new Date(now.getFullYear(), 6, 1);
+    const stdOffset = Math.max(
+      jan.getTimezoneOffset(),
+      jul.getTimezoneOffset()
+    );
+    const isDST = now.getTimezoneOffset() < stdOffset;
+    
     return `<th>${zone} (${offset}${isDST ? "*" : ""})</th>`;
   }).join("");
   tableHead.appendChild(headRow);
