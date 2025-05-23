@@ -61,7 +61,7 @@ function exportPDF() {
 }
 
 function generateTable(autoTriggered = false) {
-  const dateStr = document.getElementById("input-date").value;
+    const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
   if (!dateStr || !timeStr) { if (!autoTriggered) alert("Please select both a date and time."); return; }
 
@@ -93,8 +93,7 @@ function generateTable(autoTriggered = false) {
   tableHead.appendChild(headRow);
 
   
-  const showUTC = document.getElementById("include-utc")?.checked;
-  for (let i = 0; i < 48; i++) {
+    for (let i = 0; i < 48; i++) {
 
     const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
     const utcLabel = utcTime.toISOString().slice(11, 16);
@@ -159,7 +158,7 @@ document.getElementById("input-time").addEventListener("change", generateTable);
 
 
 function generateTable(autoTriggered = false) {
-  const dateStr = document.getElementById("input-date").value;
+    const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
   if (!dateStr || !timeStr) {
     if (!autoTriggered) alert("Please select both a date and time.");
@@ -193,8 +192,7 @@ function generateTable(autoTriggered = false) {
   tableHead.appendChild(headRow);
 
   
-  const showUTC = document.getElementById("include-utc")?.checked;
-  for (let i = 0; i < 48; i++) {
+    for (let i = 0; i < 48; i++) {
 
     const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
     const utcHour = utcTime.getUTCHours();
