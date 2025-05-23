@@ -97,6 +97,10 @@ function generateTable(autoTriggered = false) {
     const utcLabel = utcTime.toISOString().slice(11, 16);
     const row = document.createElement("tr");
     let cells = [`<td>${utcLabel}</td>`];
+    
+    let utcHour = utcTime.getUTCHours();
+    const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
+    if (utcClass === "work") smartZones.push("__utc__");
     let workCount = 0;
 
     
