@@ -61,7 +61,7 @@ function exportPDF() {
 }
 
 function generateTable(autoTriggered = false) {
-  const showUTC = document.getElementById("include-utc")?.checked;
+  const showUTC = document.getElementById("include-utc") ? document.getElementById("include-utc").checked : false;
     const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
   if (!dateStr || !timeStr) { if (!autoTriggered) alert("Please select both a date and time."); return; }
@@ -170,7 +170,7 @@ document.getElementById("input-time").addEventListener("change", generateTable);
 
 
 function generateTable(autoTriggered = false) {
-  const showUTC = document.getElementById("include-utc")?.checked;
+  const showUTC = document.getElementById("include-utc") ? document.getElementById("include-utc").checked : false;
     const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
   if (!dateStr || !timeStr) {
