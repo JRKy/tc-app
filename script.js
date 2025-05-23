@@ -18,7 +18,7 @@ function addZone() {
       localStorage.setItem("zones", JSON.stringify(selectedZones));
       input.value = "";
       updateZoneDisplay();
-  generateTable(true);
+  try { generateTable(true); } catch(e) { console.warn('Table gen skipped:', e); }
     } catch (e) {
       alert("Invalid time zone");
     }
@@ -29,7 +29,7 @@ function removeZone(zone) {
   selectedZones = selectedZones.filter(z => z !== zone);
   localStorage.setItem("zones", JSON.stringify(selectedZones));
   updateZoneDisplay();
-  generateTable(true);
+  try { generateTable(true); } catch(e) { console.warn('Table gen skipped:', e); }
 }
 
 function utcToZonedTime(date, timeZone) {
@@ -149,12 +149,21 @@ document.getElementById("zone-input").addEventListener("input", function() {
 });
 
 window.onload = () => {
+
   applyTheme();
   updateZoneDisplay();
-  generateTable(true);
+  try { generateTable(true); } catch(e) { console.warn('Table gen skipped:', e); }
   applyTheme();
 
-  setTimeout(() => generateTable(true), 10); };
+  setTimeout(() => generateTable(true), 10); 
+  const waitForControls = setInterval(() => {
+    const cb = document.getElementById("include-utc");
+    if (cb) {
+      clearInterval(waitForControls);
+      try { generateTable(true); } catch(e) { console.warn('Table gen skipped:', e); }
+    }
+  }, 50);
+};
 
 document.getElementById("input-date").addEventListener("change", generateTable);
 document.getElementById("input-time").addEventListener("change", generateTable);
