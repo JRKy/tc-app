@@ -4,7 +4,11 @@ const OFFLINE_URL = "./index.html";
 const urlsToCache = [
   "./",
   "./index.html",
-  "./manifest.json",
+  "./assets/manifest.json",
+  "./assets/icon-192x192.png",
+  "./assets/icon-512x512.png",
+  "./assets/favicon.png",
+  "./assets/logo.svg",
   // Add any other static assets you want to cache
 ];
 

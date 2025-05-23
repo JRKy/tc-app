@@ -34,7 +34,7 @@ A modern, accessible time zone event planner web app.
 - Refactored CSS and HTML for a modern, Material-inspired look.
 - Updated all time displays and helper text to use 24-hour format.
 - Enhanced accessibility with ARIA roles, labels, skip links, focus styles, and semantic HTML structure.
-- Implemented a modular code structure, splitting logic into config.js, storage.js, timezone.js, ui.js, and table.js.
+- Implemented a modular code structure, splitting logic into js/config.js, js/storage.js, js/timezone.js, js/ui.js, and js/table.js.
 
 ## ✨ Features
 

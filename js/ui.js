@@ -89,7 +89,7 @@ class UI {
       const duration = parseInt(document.getElementById('input-duration')?.value || '1');
       const eventTimezone = document.getElementById('event-timezone')?.value;
       const title = 'TimeSync Event';
-      const description = 'Scheduled via TimeSync';
+      const description = 'Scheduled via TimeSync\n\n' + document.getElementById('timezone-table').outerHTML;
       if (!date || !time || !eventTimezone) return null;
       // Start time in ISO format
       const start = new Date(`${date}T${time}:00`);
@@ -130,12 +130,29 @@ class UI {
       });
     }
 
+    function getPlainTextTable() {
+      const table = document.getElementById('timezone-table');
+      if (!table || table.style.display === 'none') return '';
+      let text = '';
+      // Headers
+      const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+      text += headers.join('\t') + '\n';
+      // Rows
+      Array.from(table.querySelectorAll('tbody tr')).forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim().replace(/\n/g, ' '));
+        text += cells.join('\t') + '\n';
+      });
+      return text;
+    }
+
     const appleBtn = document.getElementById('add-apple-calendar');
     if (appleBtn) {
       appleBtn.addEventListener('click', () => {
         const event = getEventDetails();
         if (!event) return alert('Please fill out all event details.');
-        const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${event.title}\nDESCRIPTION:${event.description}\nDTSTART:${event.startStr}\nDTEND:${event.endStr}\nEND:VEVENT\nEND:VCALENDAR`;
+        const plainTable = getPlainTextTable();
+        const description = 'Scheduled via TimeSync';
+        const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${event.title}\nDESCRIPTION:${description.replace(/\n/g, '\\n')}\\n\\n${plainTable.replace(/\n/g, '\\n')}\nDTSTART:${event.startStr}\nDTEND:${event.endStr}\nEND:VEVENT\nEND:VCALENDAR`;
         const blob = new Blob([ics], { type: 'text/calendar' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

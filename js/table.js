@@ -89,15 +89,14 @@ class Table {
     const headRow = document.createElement('tr');
     const eventDisplayName = timezoneUtils.getTimezoneDisplayName(eventTimezone);
     const isEventDST = timezoneUtils.isDST(eventTimezone);
-    
-    let headerContent = `<th style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">📍 ${eventDisplayName}${isEventDST ? ' *' : ''}<br><small>Event Time</small></th>`;
-    
+    // Event column header with icon
+    let headerContent = `<th scope="col"><span class="header-icon material-icons">public</span><br>📍 ${eventDisplayName}${isEventDST ? ' *' : ''}<br><small>Event Time</small></th>`;
+    // Viewer columns with icon
     storage.getZones().forEach(zone => {
       const displayName = timezoneUtils.getTimezoneDisplayName(zone);
       const isDST = timezoneUtils.isDST(zone);
-      headerContent += `<th>👥 ${displayName}${isDST ? ' *' : ''}<br><small>Viewer</small></th>`;
+      headerContent += `<th scope="col"><span class="header-icon material-icons">group</span><br>👥 ${displayName}${isDST ? ' *' : ''}<br><small>Viewer</small></th>`;
     });
-    
     headRow.innerHTML = headerContent;
     tableHead.innerHTML = '';
     tableHead.appendChild(headRow);

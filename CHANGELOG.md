@@ -15,7 +15,7 @@
 ### Added
 - **Modern UI/UX**: Refactored CSS and HTML for a modern, Material-inspired look.
 - **Accessibility**: Enhanced accessibility with ARIA roles, labels, skip links, focus styles, and semantic HTML structure.
-- **Modular Code Structure**: Implemented a modular code structure, splitting logic into config.js, storage.js, timezone.js, ui.js, and table.js.
+- **Modular Code Structure**: Implemented a modular code structure, splitting logic into js/config.js, js/storage.js, js/timezone.js, js/ui.js, and js/table.js.
 
 ### Changed
 - **Time Display**: Updated all time displays and helper text to use 24-hour format. 

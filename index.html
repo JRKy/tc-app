@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TimeSync - Plan events across time zones with confidence" />
+  <meta name="theme-color" content="#667eea">
+  <link rel="manifest" href="assets/manifest.json">
   <title>TimeSync - Global Time Zone Planner</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23667eea'/><text x='50%25' y='55%25' text-anchor='middle' fill='%23fff' font-size='42' font-family='Arial' dy='.3em'>⏰</text></svg>" type="image/svg+xml" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     :root {
       --primary: #667eea;
@@ -27,6 +31,9 @@
       --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       --radius: 12px;
       --radius-lg: 16px;
+      --table-header-gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+      --table-header-icon-bg: rgba(102,126,234,0.12);
+      --table-radius: 14px;
     }
 
     [data-theme='dark'] {
@@ -113,22 +120,26 @@
       border: none;
       border-radius: var(--radius);
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       cursor: pointer;
       transition: all 0.2s ease;
       text-decoration: none;
       white-space: nowrap;
+      position: relative;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      box-shadow: var(--shadow);
+    }
+
+    .btn:focus {
+      outline: 3px solid var(--primary);
+      outline-offset: 2px;
+      z-index: 2;
     }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      box-shadow: var(--shadow);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-lg);
     }
 
     .btn-secondary {
@@ -137,9 +148,39 @@
       border: 2px solid var(--border);
     }
 
-    .btn-secondary:hover {
-      border-color: var(--primary);
+    .btn-icon {
+      padding: 0.5rem;
+      min-width: 44px;
+      min-height: 44px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
       color: var(--primary);
+      box-shadow: none;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-icon:focus, .btn-icon:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .error-message {
+      background-color: var(--danger);
+      color: white;
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin: 1rem 0;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+
+    .error-message.show {
+      display: block;
     }
 
     .controls {
@@ -271,6 +312,7 @@
       padding: 1.5rem;
       background: var(--bg-secondary);
       border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
 
     .legend-item {
@@ -279,53 +321,79 @@
       gap: 0.5rem;
       padding: 0.5rem 1rem;
       border-radius: 2rem;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       font-weight: 500;
       border: 2px solid transparent;
+      background: var(--bg-primary);
+      box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
     }
 
-    .legend-item.work { 
-      background: linear-gradient(135deg, #c6f6d5, #9ae6b4); 
+    .legend-item.work {
+      background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
       color: #22543d;
     }
-    .legend-item.sleep { 
-      background: linear-gradient(135deg, #e2e8f0, #cbd5e0); 
+    .legend-item.sleep {
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
       color: #2d3748;
     }
-    .legend-item.off { 
-      background: linear-gradient(135deg, #fef5e7, #fbd38d); 
+    .legend-item.off {
+      background: linear-gradient(135deg, #fef5e7, #fbd38d);
       color: #744210;
     }
-    .legend-item.smart { 
-      background: linear-gradient(135deg, var(--success), #38a169); 
+    .legend-item.smart {
+      background: linear-gradient(135deg, var(--success), #38a169);
       color: white;
+    }
+    .legend-item .material-icons {
+      font-size: 1.3em;
+      margin-right: 0.3em;
     }
 
     .table-container {
       overflow-x: auto;
-      border-radius: var(--radius);
+      border-radius: var(--table-radius);
       box-shadow: var(--shadow);
       background: var(--bg-primary);
+      margin-bottom: 2rem;
     }
 
     table {
       width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 1rem;
+      border-radius: var(--table-radius);
+      overflow: hidden;
+      background: var(--bg-primary);
+      margin: 0;
     }
 
     thead th {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      background: var(--table-header-gradient);
       color: white;
       padding: 1.25rem 1rem;
       text-align: center;
-      font-weight: 600;
-      font-size: 0.85rem;
+      font-weight: 700;
+      font-size: 1rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       position: sticky;
       top: 0;
       z-index: 10;
+      border-bottom: 2px solid var(--primary-dark);
+      vertical-align: middle;
+    }
+
+    thead th .header-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--table-header-icon-bg);
+      border-radius: 50%;
+      width: 2.2em;
+      height: 2.2em;
+      margin-right: 0.5em;
+      font-size: 1.2em;
     }
 
     tbody td {
@@ -333,7 +401,9 @@
       text-align: center;
       border-bottom: 1px solid var(--border);
       font-weight: 500;
-      transition: all 0.2s ease;
+      transition: background 0.2s, color 0.2s;
+      vertical-align: middle;
+      font-size: 1rem;
     }
 
     tbody tr:hover td {
@@ -342,21 +412,21 @@
 
     tbody td small {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.85em;
       color: var(--text-muted);
       margin-top: 0.25rem;
       font-weight: 400;
     }
 
-    .time-cell.work { 
+    .time-cell.work {
       background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
       color: #22543d;
     }
-    .time-cell.sleep { 
+    .time-cell.sleep {
       background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
       color: #2d3748;
     }
-    .time-cell.off { 
+    .time-cell.off {
       background: linear-gradient(135deg, #fef5e7, #fbd38d);
       color: #744210;
     }
@@ -366,6 +436,7 @@
       color: white !important;
       font-weight: 700;
       position: relative;
+      box-shadow: 0 2px 8px 0 rgba(72,187,120,0.08);
     }
 
     .smart-slot td::before {
@@ -375,6 +446,26 @@
       top: 50%;
       transform: translateY(-50%);
       font-size: 1rem;
+    }
+
+    table, th, td {
+      border-radius: 0 !important;
+    }
+
+    table tr:first-child th:first-child {
+      border-top-left-radius: var(--table-radius);
+    }
+
+    table tr:first-child th:last-child {
+      border-top-right-radius: var(--table-radius);
+    }
+
+    table tr:last-child td:first-child {
+      border-bottom-left-radius: var(--table-radius);
+    }
+
+    table tr:last-child td:last-child {
+      border-bottom-right-radius: var(--table-radius);
     }
 
     .empty-state {
@@ -410,34 +501,29 @@
     }
 
     .theme-toggle {
-      position: relative;
-      width: 60px;
-      height: 30px;
-      background: var(--border);
-      border-radius: 15px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .theme-toggle::after {
-      content: '';
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 24px;
-      height: 24px;
-      background: white;
+      background: none;
+      border: none;
       border-radius: 50%;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow);
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: none;
+      outline: none;
     }
-
-    [data-theme='dark'] .theme-toggle {
-      background: var(--primary);
+    .theme-toggle:hover, .theme-toggle:focus {
+      background: rgba(102, 126, 234, 0.08);
     }
-
-    [data-theme='dark'] .theme-toggle::after {
-      transform: translateX(30px);
+    #theme-icon {
+      font-size: 28px;
+      color: var(--primary, #667eea);
+      transition: color 0.2s;
+    }
+    [data-theme='dark'] #theme-icon {
+      color: #fff;
     }
 
     /* Mobile Responsive */
@@ -508,54 +594,126 @@
         border: 1px solid #000;
       }
     }
+
+    /* Accessibility improvements */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Focus styles */
+    :focus {
+      outline: 3px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--primary);
+      color: white;
+      padding: 8px;
+      z-index: 100;
+      transition: top 0.3s;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* ARIA states */
+    [aria-hidden="true"] {
+      display: none !important;
+    }
+
+    /* Touch targets */
+    button, 
+    .btn,
+    .theme-toggle {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* High contrast mode */
+    @media (forced-colors: active) {
+      .time-cell.work { border: 2px solid #22543d; }
+      .time-cell.sleep { border: 2px solid #2d3748; }
+      .time-cell.off { border: 2px solid #744210; }
+      .smart-slot td { border: 2px solid #38a169; }
+    }
+
+    .material-icons {
+      font-family: 'Material Icons' !important;
+      font-style: normal !important;
+      font-weight: normal !important;
+      font-size: inherit;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
   </style>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <div class="icon" aria-hidden="true" style="text-align:center;"><span class="material-icons" style="font-size: 4rem;">star</span></div>
   <div class="app-container">
-    <header class="header">
-      <h1>⏰ TimeSync</h1>
-      <p>Plan events across time zones with confidence</p>
+    <header class="header" role="banner">
+      <div class="branding" style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+        <span class="material-icons app-logo" style="font-size: 3rem; color: var(--primary);">public</span>
+        <h1 style="margin: 0;">TimeSync</h1>
+      </div>
+      <p class="subtitle" style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary);">Plan events across time zones with confidence</p>
     </header>
 
-    <div class="main-card">
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <button class="btn btn-primary" onclick="exportPDF()">
-            📄 Export PDF
-          </button>
-          <button class="btn btn-secondary" onclick="shareSchedule()">
-            🔗 Share
-          </button>
-        </div>
-        <div class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode"></div>
+    <main id="main-content" class="main-card" role="main">
+      <div class="toolbar" role="toolbar" aria-label="Main actions" style="justify-content: center; gap: 1.5rem;">
+        <button class="btn btn-icon" id="export-btn" aria-label="Export schedule as PDF" title="Export as PDF">
+          <span class="material-icons">picture_as_pdf</span>
+        </button>
+        <button class="btn btn-icon" id="copy-table-btn" aria-label="Copy table as plain text" title="Copy table">
+          <span class="material-icons">content_copy</span>
+        </button>
+        <button class="btn btn-icon" id="share-btn" aria-label="Share schedule" title="Share">
+          <span class="material-icons">share</span>
+        </button>
+        <button class="btn btn-icon" id="theme-toggle" aria-label="Toggle dark mode" role="switch" aria-checked="false" title="Toggle dark mode">
+          <span class="material-icons" id="theme-icon">dark_mode</span>
+        </button>
       </div>
 
-      <div class="controls">
-        <div class="controls-grid">
+      <div class="controls" style="background: var(--bg-primary); border-radius: var(--radius); box-shadow: var(--shadow); margin: 2rem 0; padding: 2rem;">
+        <form class="controls-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; align-items: end;">
           <div class="input-group">
-            <label for="input-date">Event Date</label>
-            <input type="date" id="input-date" class="input-field" />
+            <label for="input-date"><span class="material-icons" style="vertical-align: middle; font-size: 1.2em;">event</span> Event Date</label>
+            <input type="date" id="input-date" class="input-field" aria-required="true" />
           </div>
-          
           <div class="input-group">
-            <label for="input-time">Event Time</label>
-            <input type="time" id="input-time" class="input-field" step="1800" />
+            <label for="input-time"><span class="material-icons" style="vertical-align: middle; font-size: 1.2em;">schedule</span> Event Time</label>
+            <input type="time" id="input-time" class="input-field" step="1800" aria-required="true" />
           </div>
-
           <div class="input-group">
-            <label for="event-timezone">Event Time Zone</label>
-            <input 
-              id="event-timezone" 
-              class="input-field" 
-              list="event-tz-list" 
-              placeholder="e.g., America/New_York"
-              autocomplete="off"
-            />
+            <label for="event-timezone"><span class="material-icons" style="vertical-align: middle; font-size: 1.2em;">public</span> Event Time Zone</label>
+            <input id="event-timezone" class="input-field" list="event-tz-list" placeholder="e.g., America/New_York" autocomplete="off" aria-required="true" aria-describedby="timezone-help" />
+            <span id="timezone-help" class="visually-hidden">Select the timezone where the event will take place</span>
           </div>
-
           <div class="input-group">
-            <label for="input-duration">Duration</label>
-            <select id="input-duration" class="input-field">
+            <label for="input-duration"><span class="material-icons" style="vertical-align: middle; font-size: 1.2em;">timelapse</span> Duration</label>
+            <select id="input-duration" class="input-field" aria-label="Event duration">
               <option value="2">2 hours (4 slots)</option>
               <option value="4" selected>4 hours (8 slots)</option>
               <option value="6">6 hours (12 slots)</option>
@@ -564,525 +722,125 @@
               <option value="24">Full day (48 slots)</option>
             </select>
           </div>
-        </div>
-
-        <div class="input-group" style="margin-bottom: 2rem;">
-          <label for="zone-input">Add Viewer Time Zones</label>
-          <div class="timezone-input-wrapper">
-            <input 
-              id="zone-input" 
-              class="input-field" 
-              list="tz-list" 
-              placeholder="Add locations of people viewing this event"
-              autocomplete="off"
-            />
-            <button class="add-zone-btn" onclick="addZone()">
-              ➕ Add
-            </button>
+          <div class="input-group" style="grid-column: 1 / -1;">
+            <label for="zone-input"><span class="material-icons" style="vertical-align: middle; font-size: 1.2em;">group_add</span> Add Viewer Time Zones</label>
+            <div class="timezone-input-wrapper">
+              <input id="zone-input" class="input-field" list="tz-list" placeholder="Add locations of people viewing this event" autocomplete="off" aria-describedby="zone-help" />
+              <button class="add-zone-btn" id="add-zone-btn" aria-label="Add timezone" type="button">
+                <span class="material-icons">add</span>
+              </button>
+            </div>
+            <span id="zone-help" class="visually-hidden">Enter the timezone of each person who will be viewing this event</span>
           </div>
+        </form>
+        <div class="selected-zones" id="selected-zones-container" style="display: none; margin-top: 1.5rem;" role="region" aria-label="Selected timezones">
+          <h3 style="font-size: 1rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.5rem;"><span class="material-icons" style="vertical-align: middle; font-size: 1.2em;">group</span> Viewer Time Zones</h3>
+          <div class="zone-chips" id="selected-zones" role="list"></div>
         </div>
-
-        <div class="selected-zones" id="selected-zones-container" style="display: none;">
-          <h3>Viewer Time Zones</h3>
-          <div class="zone-chips" id="selected-zones"></div>
-        </div>
-
-        <div class="legend">
-          <div class="legend-item work">💼 Work Hours (08:00 - 16:59)</div>
-          <div class="legend-item sleep">🌙 Sleep Hours (22:00 - 05:59)</div>
-          <div class="legend-item off">🕐 Off Hours</div>
-          <div class="legend-item smart">✨ Optimal Event Time</div>
-          <div class="legend-item">💡 * indicates Daylight Saving Time</div>
+        <div class="legend" role="complementary" aria-label="Time slot legend" style="margin-top: 2rem;">
+          <div class="legend-item work"><span class="material-icons">work</span> Work Hours (08:00 - 17:00)</div>
+          <div class="legend-item sleep"><span class="material-icons">nights_stay</span> Sleep Hours (22:00 - 06:00)</div>
+          <div class="legend-item off"><span class="material-icons">schedule</span> Off Hours (all other times)</div>
+          <div class="legend-item smart"><span class="material-icons">star</span> Optimal Event Time (everyone in work hours)</div>
+          <div class="legend-item"><span class="material-icons">lightbulb</span> * indicates Daylight Saving Time</div>
         </div>
       </div>
-
-      <div class="table-container">
+      <div class="table-container" role="region" aria-label="Time zone comparison table" style="margin-top: 2rem;">
         <div id="empty-state" class="empty-state">
-          <div class="icon">🌍</div>
+          <div class="icon" aria-hidden="true"><span class="material-icons" style="font-size: 4rem; color: var(--primary);">public</span></div>
           <h3>Ready to plan your global event?</h3>
           <p>Set your event date, time, and timezone, then add viewer locations to see when it occurs for everyone</p>
         </div>
-        
-        <table id="timezone-table" style="display: none;">
-          <thead></thead>
-          <tbody></tbody>
+        <table id="timezone-table" style="display: none;" role="grid">
+          <thead role="rowgroup">
+            <!-- Table header will be generated by JS, but ensure it uses <th scope="col"> and includes icons for all columns -->
+          </thead>
+          <tbody role="rowgroup"></tbody>
         </table>
+        <div id="calendar-buttons" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button class="btn btn-icon" id="add-google-calendar" aria-label="Add to Google Calendar" title="Add to Google Calendar">
+            <span class="material-icons">event</span> Google
+          </button>
+          <button class="btn btn-icon" id="add-outlook-calendar" aria-label="Add to Outlook Calendar" title="Add to Outlook Calendar">
+            <span class="material-icons">event_available</span> Outlook
+          </button>
+          <button class="btn btn-icon" id="add-apple-calendar" aria-label="Add to Apple Calendar" title="Add to Apple Calendar">
+            <span class="material-icons">event_note</span> Apple
+          </button>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 
   <datalist id="tz-list"></datalist>
   <datalist id="event-tz-list"></datalist>
 
-  <script>
-// In-memory storage for the artifact environment
-const storage = {
-  zones: [],
-  theme: null,
-  
-  getItem: function(key) {
-    if (key === "timesync-zones") return JSON.stringify(this.zones);
-    if (key === "timesync-theme") return this.theme;
-    return null;
-  },
-  
-  setItem: function(key, value) {
-    if (key === "timesync-zones") this.zones = JSON.parse(value);
-    if (key === "timesync-theme") this.theme = value;
-  }
-};
+  <div id="error-container" class="error-message" role="alert" aria-live="polite"></div>
 
-let selectedZones = JSON.parse(storage.getItem("timesync-zones") || "[]");
-
-// Initialize time zone suggestions
-const ianaTimeZones = [
-  'UTC',
-  'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
-  'America/Toronto', 'America/Vancouver', 'America/Mexico_City', 'America/Sao_Paulo',
-  'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Rome', 'Europe/Madrid',
-  'Europe/Amsterdam', 'Europe/Stockholm', 'Europe/Warsaw', 'Europe/Prague',
-  'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Singapore', 'Asia/Seoul',
-  'Asia/Mumbai', 'Asia/Dubai', 'Asia/Bangkok', 'Asia/Jakarta', 'Asia/Manila',
-  'Australia/Sydney', 'Australia/Melbourne', 'Australia/Perth', 'Australia/Brisbane',
-  'Pacific/Auckland', 'Pacific/Honolulu', 'Pacific/Fiji',
-  'Africa/Cairo', 'Africa/Lagos', 'Africa/Johannesburg', 'Africa/Nairobi'
-];
-
-function populateTimezoneList() {
-  const datalist = document.getElementById("tz-list");
-  const eventDatalist = document.getElementById("event-tz-list");
-  
-  const options = ianaTimeZones.slice(0, 20).map(z => `<option value="${z}"></option>`).join("");
-  
-  if (datalist) {
-    datalist.innerHTML = options;
-  }
-  if (eventDatalist) {
-    eventDatalist.innerHTML = options;
-  }
-}
-
-function updateZoneDisplay() {
-  const container = document.getElementById("selected-zones");
-  const wrapper = document.getElementById("selected-zones-container");
-  
-  if (selectedZones.length === 0) {
-    wrapper.style.display = 'none';
-    return;
-  }
-  
-  wrapper.style.display = 'block';
-  container.innerHTML = selectedZones.map(zone => `
-    <div class="zone-chip">
-      <span>${zone.replace('_', ' ')}</span>
-      <button class="remove-btn" onclick="removeZone('${zone}')" title="Remove ${zone}">
-        ✕
-      </button>
+  <div id="copy-modal" class="modal" style="display:none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: #fff; color: #222; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); padding: 2rem; max-width: 600px; width: 90vw; display: flex; flex-direction: column; gap: 1rem;">
+      <h2 style="margin-top:0;">Copy Table as Plain Text</h2>
+      <textarea id="copy-modal-text" style="width:100%; height: 200px; font-family: monospace; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; padding: 0.5rem;" readonly></textarea>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <button class="btn btn-secondary" id="copy-modal-close" aria-label="Close modal"><span class="material-icons">close</span> Close</button>
+        <button class="btn btn-primary" id="copy-modal-copy" aria-label="Copy to clipboard"><span class="material-icons">content_copy</span> Copy</button>
+      </div>
     </div>
-  `).join('');
-}
+  </div>
 
-function initTheme() {
-  const saved = storage.getItem("timesync-theme");
-  if (saved === "dark" || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.body.setAttribute('data-theme', 'dark');
-  }
-}
+  <script type="module">
+    import CONFIG from './js/config.js';
+    import storage from './js/storage.js';
+    import timezoneUtils from './js/timezone.js';
+    import ui from './js/ui.js';
+    import table from './js/table.js';
 
-function toggleDarkMode() {
-  const body = document.body;
-  const isDark = body.getAttribute('data-theme') === 'dark';
-  body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  storage.setItem("timesync-theme", isDark ? 'light' : 'dark');
-}
-
-function addZone() {
-  const input = document.getElementById("zone-input");
-  if (!input) return;
-  
-  let zone = input.value.trim();
-  
-  if (!zone) {
-    input.focus();
-    return;
-  }
-  
-  if (selectedZones.includes(zone)) {
-    console.log(`⚠️ ${zone} is already added`);
-    input.value = "";
-    input.focus();
-    return;
-  }
-  
-  const zonesToTry = [
-    zone,
-    zone.replace(/\s+/g, '_'),
-    zone.replace(/_/g, ' '),
-    zone.split('/').map(part => 
-      part.split('_').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-      ).join('_')
-    ).join('/'),
-    zone.toUpperCase() === 'EST' ? 'America/New_York' : zone,
-    zone.toUpperCase() === 'PST' ? 'America/Los_Angeles' : zone,
-    zone.toUpperCase() === 'MST' ? 'America/Denver' : zone,
-    zone.toUpperCase() === 'CST' ? 'America/Chicago' : zone,
-    zone.toUpperCase() === 'GMT' ? 'Europe/London' : zone,
-    zone.toUpperCase() === 'UTC' ? 'UTC' : zone
-  ];
-  
-  let validZone = null;
-  for (const testZone of zonesToTry) {
-    try {
-      if (testZone === 'UTC') {
-        validZone = 'UTC';
-        console.log(`Valid time zone found: UTC`);
-        break;
-      } else {
-        new Intl.DateTimeFormat("en-US", { timeZone: testZone }).format(new Date());
-        validZone = testZone;
-        console.log(`Valid time zone found: ${testZone}`);
-        break;
-      }
-    } catch (e) {
-      console.log(`Invalid time zone: ${testZone}`);
-    }
-  }
-  
-  if (validZone) {
-    selectedZones.push(validZone);
-    storage.setItem("timesync-zones", JSON.stringify(selectedZones));
-    input.value = "";
-    input.focus();
-    updateZoneDisplay();
-    console.log('About to generate table after adding zone:', validZone);
-    generateTable();
-    console.log(`✅ Added ${validZone}`);
-  } else {
-    console.log(`Failed to validate any variation of: ${zone}`);
-    console.log(`❌ Invalid time zone: "${zone}". Try selecting from dropdown suggestions.`);
-    input.focus();
-    input.select();
-  }
-}
-
-function removeZone(zone) {
-  selectedZones = selectedZones.filter(z => z !== zone);
-  storage.setItem("timesync-zones", JSON.stringify(selectedZones));
-  updateZoneDisplay();
-  generateTable();
-}
-
-function utcToZonedTime(date, timeZone) {
-  const localString = date.toLocaleString('en-US', {
-    timeZone: timeZone,
-    hour12: false
-  });
-
-  const [datePart, timePart] = localString.split(', ');
-  const [month, day, year] = datePart.split('/');
-  const [hour, minute, second = '00'] = timePart.split(':');
-
-  return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:${second.padStart(2, '0')}`);
-}
-
-function generateTable() {
-  console.log('🚀 NEW generateTable called');
-  const dateInput = document.getElementById("input-date");
-  const timeInput = document.getElementById("input-time");
-  const eventTimezoneInput = document.getElementById("event-timezone");
-  const durationInput = document.getElementById("input-duration");
-  const table = document.getElementById("timezone-table");
-  const emptyState = document.getElementById("empty-state");
-  
-  if (!dateInput || !timeInput || !eventTimezoneInput || !durationInput || !table || !emptyState) {
-    console.log("❌ Required DOM elements not found");
-    return;
-  }
-  
-  const dateStr = dateInput.value;
-  const timeStr = timeInput.value;
-  const eventTimezone = eventTimezoneInput.value.trim();
-  const durationHours = parseInt(durationInput.value || "4");
-  
-  console.log('📊 Inputs:', {
-    date: dateStr,
-    time: timeStr, 
-    eventTz: eventTimezone,
-    duration: durationHours
-  });
-  
-  // Show empty state if missing critical info
-  if (!dateStr || !timeStr || !eventTimezone) {
-    console.log('❌ Missing required fields - showing empty state');
-    table.style.display = 'none';
-    emptyState.style.display = 'block';
-    return;
-  }
-  
-  // Validate event timezone
-  let validEventTimezone = null;
-  try {
-    if (eventTimezone === 'UTC') {
-      validEventTimezone = 'UTC';
-    } else {
-      new Intl.DateTimeFormat("en-US", { timeZone: eventTimezone }).format(new Date());
-      validEventTimezone = eventTimezone;
-    }
-    console.log('✅ Valid event timezone:', validEventTimezone);
-  } catch (e) {
-    console.log('❌ Invalid event timezone:', eventTimezone);
-    table.style.display = 'none';
-    emptyState.style.display = 'block';
-    return;
-  }
-  
-  // CREATE EVENT TIME
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const [hours, minutes] = timeStr.split(":").map(Number);
-
-  let eventTimeUTC;
-  if (validEventTimezone === 'UTC') {
-    eventTimeUTC = new Date(Date.UTC(year, month - 1, day, hours, minutes));
-  } else {
-    // Create the date string in the event timezone
-    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
-    // Convert to UTC using the event timezone
-    eventTimeUTC = new Date(new Date(dateStr).toLocaleString('en-US', { timeZone: validEventTimezone }));
-  }
-
-  console.log('🕐 Event time UTC:', eventTimeUTC.toISOString());
-
-  // SHOW TABLE - this should always happen now!
-  console.log('✅ Showing table with event timezone');
-  table.style.display = 'table';
-  emptyState.style.display = 'none';
-
-  const tableHead = document.querySelector("#timezone-table thead");
-  const tableBody = document.querySelector("#timezone-table tbody");
-  
-  if (!tableHead || !tableBody) {
-    console.log("❌ Table elements not found");
-    return;
-  }
-  
-  tableHead.innerHTML = "";
-  tableBody.innerHTML = "";
-
-  // CREATE HEADER - Event timezone FIRST, then viewers
-  const headRow = document.createElement("tr");
-  const eventDisplayName = validEventTimezone === 'UTC' ? 'UTC' : validEventTimezone.split('/').pop().replace('_', ' ');
-  
-  let headerContent = `<th style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">📍 ${eventDisplayName}<br><small>Event Time</small></th>`;
-  console.log('📍 Added event header:', eventDisplayName);
-  
-  // Add viewer columns
-  selectedZones.forEach(zone => {
-    const displayName = zone === 'UTC' ? 'UTC' : zone.split('/').pop().replace('_', ' ');
-    headerContent += `<th>👥 ${displayName}<br><small>Viewer</small></th>`;
-    console.log('👥 Added viewer header:', displayName);
-  });
-  
-  headRow.innerHTML = headerContent;
-  tableHead.appendChild(headRow);
-
-  // CREATE ROWS
-  const totalSlots = durationHours * 2;
-  console.log(`📊 Generating ${totalSlots} time slots`);
-
-  for (let i = 0; i < totalSlots; i++) {
-    const utcTime = new Date(eventTimeUTC.getTime() + i * 30 * 60 * 1000);
-    const row = document.createElement("tr");
-    let cells = [];
-
-    // EVENT CELL (always first)
-    let eventLocalTime;
-    if (validEventTimezone === 'UTC') {
-      eventLocalTime = utcTime;
-    } else {
-      eventLocalTime = utcToZonedTime(utcTime, validEventTimezone);
-    }
-    
-    // Use the original input time for the first slot, then increment by 30 minutes
-    const baseTime = new Date(`${dateStr}T${timeStr}`);
-    const slotTime = new Date(baseTime.getTime() + i * 30 * 60 * 1000);
-    const displayTime = slotTime.toTimeString().slice(0, 5);
-    const eventDay = slotTime.toLocaleDateString('en-US', { 
-      weekday: 'short', month: 'short', day: 'numeric' 
-    });
-    
-    // Calculate work hours using the event timezone time
-    let eventHour;
-    if (validEventTimezone === 'UTC') {
-      eventHour = utcTime.getUTCHours();
-    } else {
-      eventHour = eventLocalTime.getHours();
-    }
-    const eventMinute = eventLocalTime.getMinutes();
-    const eventClass = (eventHour >= 8 && eventHour < 17) ? "work" : 
-                      (eventHour >= 22 || eventHour < 6) ? "sleep" : "off";
-    
-    // Debug log for event timezone
-    console.log('Event timezone time:', {
-      timezone: validEventTimezone,
-      hour: eventHour,
-      minute: eventMinute,
-      class: eventClass,
-      displayTime: displayTime
-    });
-    
-    cells.push(`<td class="time-cell ${eventClass}" style="font-weight: bold; border-left: 4px solid #667eea;">${displayTime}<br><small>${eventDay}</small></td>`);
-
-    // VIEWER CELLS
-    selectedZones.forEach(zone => {
-      if (zone === "UTC") {
-        const utcHour = utcTime.getUTCHours();
-        const utcMinute = utcTime.getUTCMinutes();
-        const utcLabel = `${String(utcHour).padStart(2, '0')}:${String(utcMinute).padStart(2, '0')}`;
-        const utcDay = utcTime.toLocaleDateString('en-US', { 
-          weekday: 'short', month: 'short', day: 'numeric' 
-        });
-        
-        const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : 
-                        (utcHour >= 22 || utcHour < 6) ? "sleep" : "off";
-        
-        cells.push(`<td class="time-cell ${utcClass}">${utcLabel}<br><small>${utcDay}</small></td>`);
-      } else {
-        const local = utcToZonedTime(utcTime, zone);
-        const localHour = local.getHours();
-        const localMinute = local.getMinutes();
-        const localLabel = `${String(localHour).padStart(2, '0')}:${String(localMinute).padStart(2, '0')}`;
-        const localDay = local.toLocaleDateString('en-US', { 
-          weekday: 'short', month: 'short', day: 'numeric' 
-        });
-        
-        const cls = (localHour >= 8 && localHour < 17) ? "work" : 
-                    (localHour >= 22 || localHour < 6) ? "sleep" : "off";
-        
-        cells.push(`<td class="time-cell ${cls}">${localLabel}<br><small>${localDay}</small></td>`);
-      }
-    });
-
-    // Check if this is a smart slot (all timezones are in work hours)
-    const isSmartSlot = selectedZones.length > 0 && cells.every((cell, index) => {
-      const timeStr = cell.match(/(\d{2}):(\d{2})/)[0];
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      return hours >= 8 && hours < 17;
-    });
-
-    if (isSmartSlot) {
-      row.classList.add('smart-slot');
-    }
-
-    row.innerHTML = cells.join("");
-    tableBody.appendChild(row);
-  }
-  
-  console.log('✅ Table generation complete!');
-}
-
-function exportPDF() {
-  window.print();
-}
-
-function shareSchedule() {
-  const zones = selectedZones.join(', ');
-  const date = document.getElementById("input-date").value;
-  const time = document.getElementById("input-time").value;
-  const eventTz = document.getElementById("event-timezone").value;
-  
-  const url = window.location.href;
-  navigator.clipboard.writeText(url).then(() => {
-    console.log('📋 Schedule link copied to clipboard!');
-  }).catch(() => {
-    console.log('📋 Could not copy to clipboard');
-  });
-}
-
-function isStandalone() {
-  return window.matchMedia('(display-mode: standalone)').matches || 
-         window.navigator.standalone || 
-         document.referrer.includes('android-app://');
-}
-
-// INITIALIZATION
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 TimeSync DOM loaded');
-  
-  initTheme();
-  updateZoneDisplay();
-  populateTimezoneList();
-  
-  // Set defaults
-  const today = new Date().toISOString().split('T')[0];
-  const currentTime = new Date().toTimeString().slice(0, 5);
-  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  
-  const dateInput = document.getElementById("input-date");
-  const timeInput = document.getElementById("input-time");
-  const eventTimezoneInput = document.getElementById("event-timezone");
-  
-  if (dateInput) {
-    dateInput.value = today;
-    dateInput.addEventListener("change", generateTable);
-  }
-  
-  if (timeInput) {
-    timeInput.value = currentTime;
-    timeInput.addEventListener("change", generateTable);
-  }
-  
-  if (eventTimezoneInput) {
-    eventTimezoneInput.value = ""; // Clear the timezone input initially
-    eventTimezoneInput.placeholder = "Select event timezone (e.g., " + userTimezone + ")";
-    eventTimezoneInput.addEventListener("change", () => {
-      console.log('🌍 Event timezone changed to:', eventTimezoneInput.value);
-      if (eventTimezoneInput.value) {
-        generateTable();
-      }
-    });
-    eventTimezoneInput.addEventListener("input", function() {
-      const input = this.value.toLowerCase();
-      const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 TimeSync DOM loaded');
       
-      let datalist = document.getElementById("event-tz-list");
-      if (datalist) {
-        datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}"></option>`).join("");
-      }
-    });
-  }
-  
-  // Duration and zone inputs
-  const durationInput = document.getElementById("input-duration");
-  if (durationInput) {
-    durationInput.addEventListener("change", generateTable);
-  }
-  
-  const zoneInput = document.getElementById("zone-input");
-  if (zoneInput) {
-    zoneInput.addEventListener("keypress", function(e) {
-      if (e.key === 'Enter') {
-        addZone();
-      }
-    });
-    
-    zoneInput.addEventListener("input", function() {
-      const input = this.value.toLowerCase();
-      const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+      // Set defaults
+      const today = new Date().toISOString().split('T')[0];
+      const currentTime = new Date().toTimeString().slice(0, 5);
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       
-      let datalist = document.getElementById("tz-list");
-      if (datalist) {
-        datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}"></option>`).join("");
+      const dateInput = document.getElementById('input-date');
+      const timeInput = document.getElementById('input-time');
+      const eventTimezoneInput = document.getElementById('event-timezone');
+      
+      if (dateInput) dateInput.value = today;
+      if (timeInput) timeInput.value = currentTime;
+      if (eventTimezoneInput) {
+        eventTimezoneInput.placeholder = `Select event timezone (e.g., ${userTimezone})`;
       }
+
+      // Initialize theme
+      const savedTheme = storage.getTheme();
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.body.setAttribute('data-theme', 'dark');
+        document.querySelector('.theme-toggle').setAttribute('aria-checked', 'true');
+      }
+
+      // Update keyboard shortcut tooltips
+      const shortcuts = CONFIG.shortcuts;
+      document.querySelectorAll('[data-shortcut]').forEach(element => {
+        const shortcut = shortcuts[element.dataset.shortcut];
+        if (shortcut) {
+          element.title += ` (⌘${shortcut.key.toUpperCase()})`;
+        }
+      });
     });
-
-    zoneInput.addEventListener("focus", populateTimezoneList);
-  }
-
-  if (isStandalone()) {
-    document.body.classList.add('pwa-installed');
-  }
-});
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }).catch(error => {
+          console.log('ServiceWorker registration failed: ', error);
+        });
+      });
+    }
   </script>
 </body>
 </html>
