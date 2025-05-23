@@ -1,46 +1,1122 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Time Zone Planner</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <title>TimeSync - Global Time Zone Planner</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23667eea'/><text x='50%25' y='55%25' text-anchor='middle' fill='%23fff' font-size='42' font-family='Arial' dy='.3em'>⏰</text></svg>" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#667eea" />
+  <style>
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5a67d8;
+      --secondary: #764ba2;
+      --accent: #f093fb;
+      --success: #48bb78;
+      --warning: #ed8936;
+      --danger: #f56565;
+      --info: #4299e1;
+      
+      --bg-primary: #ffffff;
+      --bg-secondary: #f7fafc;
+      --bg-card: #ffffff;
+      --text-primary: #2d3748;
+      --text-secondary: #718096;
+      --text-muted: #a0aec0;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius: 12px;
+      --radius-lg: 16px;
+    }
+
+    [data-theme='dark'] {
+      --bg-primary: #1a202c;
+      --bg-secondary: #2d3748;
+      --bg-card: #2d3748;
+      --text-primary: #f7fafc;
+      --text-secondary: #e2e8f0;
+      --text-muted: #a0aec0;
+      --border: #4a5568;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    .app-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem;
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    .main-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .toolbar-left {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .controls {
+      padding: 2rem;
+      background: var(--bg-primary);
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .input-group label {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-field {
+      padding: 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .timezone-input-wrapper {
+      position: relative;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .timezone-input-wrapper .input-field {
+      flex: 1;
+    }
+
+    .add-zone-btn {
+      background: linear-gradient(135deg, var(--success), #38a169);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .add-zone-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .selected-zones {
+      margin-bottom: 2rem;
+    }
+
+    .selected-zones h3 {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .zone-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .zone-chip {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+
+    .zone-chip .remove-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .zone-chip .remove-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: 2px solid transparent;
+    }
+
+    .legend-item.work { 
+      background: linear-gradient(135deg, #c6f6d5, #9ae6b4); 
+      color: #22543d;
+    }
+    .legend-item.sleep { 
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e0); 
+      color: #2d3748;
+    }
+    .legend-item.off { 
+      background: linear-gradient(135deg, #fef5e7, #fbd38d); 
+      color: #744210;
+    }
+    .legend-item.smart { 
+      background: linear-gradient(135deg, var(--success), #38a169); 
+      color: white;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      background: var(--bg-primary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    thead th {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    tbody td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    tbody tr:hover td {
+      background-color: var(--bg-secondary) !important;
+    }
+
+    tbody td small {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      font-weight: 400;
+    }
+
+    .time-cell.work { 
+      background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+      color: #22543d;
+    }
+    .time-cell.sleep { 
+      background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+      color: #2d3748;
+    }
+    .time-cell.off { 
+      background: linear-gradient(135deg, #fef5e7, #fbd38d);
+      color: #744210;
+    }
+
+    .smart-slot td {
+      background: linear-gradient(135deg, var(--success), #38a169) !important;
+      color: white !important;
+      font-weight: 700;
+      position: relative;
+    }
+
+    .smart-slot td::before {
+      content: '✨';
+      position: absolute;
+      left: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state .icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    .empty-state p {
+      font-size: 1rem;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .loading {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .app-container {
+        padding: 0.5rem;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+
+      .toolbar-left {
+        justify-content: center;
+      }
+
+      .controls {
+        padding: 1.5rem;
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .timezone-input-wrapper {
+        flex-direction: column;
+      }
+
+      .legend {
+        padding: 1rem;
+      }
+
+      .legend-item {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+      }
+
+      thead th {
+        padding: 1rem 0.5rem;
+        font-size: 0.8rem;
+      }
+
+      tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+      }
+      
+      .toolbar, .controls {
+        display: none;
+      }
+      
+      .main-card {
+        box-shadow: none;
+        border: 1px solid #000;
+      }
+    }
+
+    /* Focus styles for accessibility */
+    .btn:focus,
+    .input-field:focus,
+    .remove-btn:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Dark mode toggle */
+    .theme-toggle {
+      position: relative;
+      width: 60px;
+      height: 30px;
+      background: var(--border);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+    }
+
+    [data-theme='dark'] .theme-toggle {
+      background: var(--primary);
+    }
+
+    [data-theme='dark'] .theme-toggle::after {
+      transform: translateX(30px);
+    }
+
+    /* PWA-specific styles */
+    .pwa-installed {
+      --header-padding: env(safe-area-inset-top);
+    }
+
+    .pwa-installed .header {
+      padding-top: max(1rem, env(safe-area-inset-top));
+    }
+
+    /* Safe area handling for notched devices */
+    @supports (padding: max(0px)) {
+      .app-container {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+      }
+    }
+
+    /* Enhanced loading states */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Connection status indicator */
+    .connection-status {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .connection-status.online {
+      background: var(--success);
+      color: white;
+    }
+
+    .connection-status.offline {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Improved touch targets for mobile */
+    @media (max-width: 768px) {
+      .btn, .input-field, .remove-btn {
+        min-height: 44px;
+        min-width: 44px;
+      }
+      
+      .zone-chip .remove-btn {
+        min-width: 32px;
+        min-height: 32px;
+      }
+    }
+
+    /* Reduced motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      :root {
+        --border: #000000;
+        --text-primary: #000000;
+        --text-secondary: #000000;
+      }
+      
+      .btn {
+        border: 2px solid currentColor;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Time Zone Planner</h1>
-  
-<div class="toolbar">
-  <button onclick="toggleDarkMode()"><span class="material-icons">dark_mode</span> Theme</button>
-  <button onclick="exportPDF()"><span class="material-icons">download</span> Export</button>
-  
-</div>
+  <div class="app-container">
+    <header class="header">
+      <h1>⏰ TimeSync</h1>
+      <p>Plan meetings across time zones with confidence</p>
+    </header>
 
-<div class="controls">
-    <label>Date: <input type="date" id="input-date" /></label>
-    <label>Time (UTC): <input type="time" id="input-time" step="1800" /></label>
-    <label>Time Zone: <input id="zone-input" list="tz-list" placeholder="e.g. America/Denver" /></label>
-    <button onclick="addZone()">➕ Add</button>
-    
+    <div class="main-card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-primary" onclick="exportPDF()">
+            📄 Export PDF
+          </button>
+          <button class="btn btn-secondary" onclick="shareSchedule()">
+            🔗 Share
+          </button>
+        </div>
+        <div class="theme-toggle" onclick="toggleDarkMode()" title="Toggle dark mode"></div>
+      </div>
+
+      <div class="controls">
+        <div class="controls-grid">
+          <div class="input-group">
+            <label for="input-date">Meeting Date</label>
+            <input type="date" id="input-date" class="input-field" />
+          </div>
+          
+          <div class="input-group">
+            <label for="input-time">Start Time (UTC)</label>
+            <input type="time" id="input-time" class="input-field" step="1800" />
+          </div>
+          
+          <div class="input-group">
+            <label for="zone-input">Add Time Zone</label>
+            <div class="timezone-input-wrapper">
+              <input 
+                id="zone-input" 
+                class="input-field" 
+                list="tz-list" 
+                placeholder="e.g., America/New_York"
+                autocomplete="off"
+              />
+              <button class="add-zone-btn" onclick="addZone()">
+                ➕ Add
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="selected-zones" id="selected-zones-container" style="display: none;">
+          <h3>Selected Time Zones</h3>
+          <div class="zone-chips" id="selected-zones"></div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item work">💼 Work Hours (8AM - 5PM)</div>
+          <div class="legend-item sleep">🌙 Sleep Hours (10PM - 6AM)</div>
+          <div class="legend-item off">🕐 Off Hours</div>
+          <div class="legend-item smart">✨ Optimal Meeting Time</div>
+          <div class="legend-item">💡 * indicates Daylight Saving Time</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div id="empty-state" class="empty-state">
+          <div class="icon">🌍</div>
+          <h3>Ready to plan your global meeting?</h3>
+          <p>Select a date, time, and add some time zones to get started</p>
+        </div>
+        
+        <table id="timezone-table" style="display: none;">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
   </div>
-  <div id="selected-zones"></div>
-  
-<div class="legend">
-  <strong>Legend:</strong>
-  <span class="legend-item work">💼 Work Hours</span>
-  <span class="legend-item sleep">🌙 Sleep Hours</span>
-  <span class="legend-item off">🕓 Off Hours</span>
-  <span class="legend-item smart">✅ All zones in work hours</span>
-  <span class="legend-item">* = Daylight Saving Time (DST)</span>
-</div>
 
-<table id="timezone-table">
-    <thead></thead>
-    <tbody></tbody>
-  </table>
-  <script src="script.js"></script>
   <datalist id="tz-list"></datalist>
+
+  <script>
+    // In-memory storage for the artifact environment
+    const storage = {
+      zones: [],
+      theme: null,
+      
+      getItem: function(key) {
+        if (key === "timesync-zones") return JSON.stringify(this.zones);
+        if (key === "timesync-theme") return this.theme;
+        return null;
+      },
+      
+      setItem: function(key, value) {
+        if (key === "timesync-zones") this.zones = JSON.parse(value);
+        if (key === "timesync-theme") this.theme = value;
+      }
+    };
+
+    let selectedZones = JSON.parse(storage.getItem("timesync-zones") || "[]");
+
+    // Initialize theme
+    function initTheme() {
+      const saved = storage.getItem("timesync-theme");
+      if (saved === "dark" || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.body.setAttribute('data-theme', 'dark');
+      }
+    }
+
+    function toggleDarkMode() {
+      const body = document.body;
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      storage.setItem("timesync-theme", isDark ? 'light' : 'dark');
+    }
+
+    function updateZoneDisplay() {
+      const container = document.getElementById("selected-zones");
+      const wrapper = document.getElementById("selected-zones-container");
+      
+      if (selectedZones.length === 0) {
+        wrapper.style.display = 'none';
+        return;
+      }
+      
+      wrapper.style.display = 'block';
+      container.innerHTML = selectedZones.map(zone => `
+        <div class="zone-chip">
+          <span>${zone.replace('_', ' ')}</span>
+          <button class="remove-btn" onclick="removeZone('${zone}')" title="Remove ${zone}">
+            ✕
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function addZone() {
+      const input = document.getElementById("zone-input");
+      const zone = input.value.trim();
+      
+      if (!zone) {
+        input.focus();
+        return;
+      }
+      
+      if (selectedZones.includes(zone)) {
+        input.value = "";
+        input.focus();
+        return;
+      }
+      
+      try {
+        new Intl.DateTimeFormat("en-US", { timeZone: zone }).format(new Date());
+        selectedZones.push(zone);
+        storage.setItem("timesync-zones", JSON.stringify(selectedZones));
+        input.value = "";
+        input.focus();
+        updateZoneDisplay();
+        generateTable();
+      } catch (e) {
+        alert("❌ Invalid time zone. Please select from the dropdown suggestions.");
+        input.focus();
+      }
+    }
+
+    function removeZone(zone) {
+      selectedZones = selectedZones.filter(z => z !== zone);
+      storage.setItem("timesync-zones", JSON.stringify(selectedZones));
+      updateZoneDisplay();
+      generateTable();
+    }
+
+    function utcToZonedTime(date, timeZone) {
+      const localString = date.toLocaleString('en-US', {
+        timeZone: timeZone,
+        hour12: false
+      });
+
+      const [datePart, timePart] = localString.split(', ');
+      const [month, day, year] = datePart.split('/');
+      const [hour, minute, second = '00'] = timePart.split(':');
+
+      return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:${second.padStart(2, '0')}`);
+    }
+
+    function generateTable() {
+      const dateStr = document.getElementById("input-date").value;
+      const timeStr = document.getElementById("input-time").value;
+      const table = document.getElementById("timezone-table");
+      const emptyState = document.getElementById("empty-state");
+      
+      if (!dateStr || !timeStr || selectedZones.length === 0) {
+        table.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      table.style.display = 'table';
+      emptyState.style.display = 'none';
+
+      const [year, month, day] = dateStr.split("-").map(Number);
+      const [hour, minute] = timeStr.split(":").map(Number);
+      const startUTC = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+      const tableHead = document.querySelector("#timezone-table thead");
+      const tableBody = document.querySelector("#timezone-table tbody");
+      tableHead.innerHTML = "";
+      tableBody.innerHTML = "";
+
+      // Create header
+      const headRow = document.createElement("tr");
+      headRow.innerHTML = "<th>UTC Time</th>" + selectedZones.map(zone => {
+        const offsetDate = new Date();
+        const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: zone,
+          timeZoneName: "shortOffset"
+        }).formatToParts(offsetDate);
+        const offsetPart = formatter.find(p => p.type === "timeZoneName")?.value || "";
+        
+        // Check for DST
+        const jan = new Date(startUTC.getFullYear(), 0, 1);
+        const jul = new Date(startUTC.getFullYear(), 6, 1);
+        const janOffset = jan.getTimezoneOffset();
+        const julOffset = jul.getTimezoneOffset();
+        const isDST = Math.max(janOffset, julOffset) !== offsetDate.getTimezoneOffset();
+        
+        const label = offsetPart.replace("GMT", "UTC") + (isDST ? "*" : "");
+        const displayName = zone.split('/').pop().replace('_', ' ');
+        
+        return `<th>${displayName}<br><small>${label}</small></th>`;
+      }).join("");
+      tableHead.appendChild(headRow);
+
+      // Generate 48 half-hour slots
+      for (let i = 0; i < 48; i++) {
+        const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
+        const utcHour = utcTime.getUTCHours();
+        const utcLabel = utcTime.toISOString().slice(11, 16);
+        const utcDay = utcTime.toLocaleDateString('en-US', { 
+          weekday: 'short', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+        
+        const row = document.createElement("tr");
+        let smartZones = [];
+        
+        // UTC column
+        const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : 
+                        (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
+        
+        let cells = [`<td class="time-cell ${utcClass}">${utcLabel}<br><small>${utcDay}</small></td>`];
+
+        // Zone columns
+        selectedZones.forEach(zone => {
+          const local = utcToZonedTime(utcTime, zone);
+          const localHour = local.getHours();
+          const localLabel = local.toTimeString().slice(0, 5);
+          const localDay = local.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          
+          const cls = (localHour >= 8 && localHour < 17) ? "work" : 
+                      (localHour < 6 || localHour >= 22) ? "sleep" : "off";
+          
+          if (cls === "work") smartZones.push(zone);
+          
+          cells.push(`<td class="time-cell ${cls}">${localLabel}<br><small>${localDay}</small></td>`);
+        });
+
+        // Highlight optimal meeting times
+        if (selectedZones.length > 1 && smartZones.length === selectedZones.length) {
+          row.classList.add("smart-slot");
+        }
+
+        row.innerHTML = cells.join("");
+        tableBody.appendChild(row);
+      }
+    }
+
+    function exportPDF() {
+      window.print();
+    }
+
+    function shareSchedule() {
+      if (navigator.share && selectedZones.length > 0) {
+        const zones = selectedZones.join(', ');
+        const date = document.getElementById("input-date").value;
+        const time = document.getElementById("input-time").value;
+        
+        navigator.share({
+          title: 'TimeSync Meeting Schedule',
+          text: `Meeting scheduled for ${date} at ${time} UTC across time zones: ${zones}`,
+          url: window.location.href
+        });
+      } else {
+        // Fallback: copy to clipboard
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+          showToast('📋 Schedule link copied to clipboard!');
+        }).catch(() => {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = url;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          showToast('📋 Schedule link copied!');
+        });
+      }
+    }
+
+    function showToast(message, duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--text-primary);
+        color: var(--bg-primary);
+        padding: 1rem 2rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        z-index: 1000;
+        animation: slideUp 0.3s ease;
+      `;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideDown 0.3s ease';
+        setTimeout(() => document.body.removeChild(toast), 300);
+      }, duration);
+    }
+
+    // Connection status monitoring
+    function updateConnectionStatus() {
+      const indicator = document.getElementById('connection-status') || createConnectionIndicator();
+      
+      if (navigator.onLine) {
+        indicator.className = 'connection-status online';
+        indicator.textContent = '🟢 Online';
+        setTimeout(() => indicator.style.display = 'none', 2000);
+      } else {
+        indicator.className = 'connection-status offline';
+        indicator.textContent = '🔴 Offline';
+        indicator.style.display = 'block';
+      }
+    }
+
+    function createConnectionIndicator() {
+      const indicator = document.createElement('div');
+      indicator.id = 'connection-status';
+      indicator.className = 'connection-status';
+      document.body.appendChild(indicator);
+      return indicator;
+    }
+
+    // Monitor connection changes
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+
+    // Add toast animation styles
+    const toastStyles = document.createElement('style');
+    toastStyles.textContent = `
+      @keyframes slideUp {
+        from { transform: translate(-50%, 100px); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+      }
+      @keyframes slideDown {
+        from { transform: translate(-50%, 0); opacity: 1; }
+        to { transform: translate(-50%, 100px); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(toastStyles);
+
+    // Initialize time zone suggestions
+    const ianaTimeZones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [
+      'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
+      'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Asia/Tokyo', 'Asia/Shanghai',
+      'Australia/Sydney', 'Pacific/Auckland'
+    ];
+
+    document.getElementById("zone-input").addEventListener("input", function() {
+      const input = this.value.toLowerCase();
+      const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+      
+      let datalist = document.getElementById("tz-list");
+      datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}">`).join("");
+    });
+
+    // Event listeners
+    document.getElementById("input-date").addEventListener("change", generateTable);
+    document.getElementById("input-time").addEventListener("change", generateTable);
+    document.getElementById("zone-input").addEventListener("keypress", function(e) {
+      if (e.key === 'Enter') {
+        addZone();
+      }
+    });
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((registration) => {
+            console.log('ServiceWorker registration successful: ', registration.scope);
+            
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New update available
+                  showUpdateNotification();
+                }
+              });
+            });
+          })
+          .catch((error) => {
+            console.log('ServiceWorker registration failed: ', error);
+          });
+      });
+    }
+
+    function showUpdateNotification() {
+      if (confirm('🚀 A new version of TimeSync is available! Reload to update?')) {
+        window.location.reload();
+      }
+    }
+
+    // Install prompt for PWA
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInstallButton();
+    });
+
+    function showInstallButton() {
+      const installBtn = document.createElement('button');
+      installBtn.className = 'btn btn-primary';
+      installBtn.innerHTML = '📱 Install App';
+      installBtn.onclick = installApp;
+      
+      const toolbar = document.querySelector('.toolbar-left');
+      toolbar.appendChild(installBtn);
+    }
+
+    async function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        console.log('Install prompt result:', result);
+        deferredPrompt = null;
+        
+        // Hide install button
+        event.target.style.display = 'none';
+      }
+    }
+
+    // Handle app installed
+    window.addEventListener('appinstalled', () => {
+      console.log('TimeSync PWA was installed');
+      deferredPrompt = null;
+    });
+
+    // Detect if app is installed
+    function isStandalone() {
+      return window.matchMedia('(display-mode: standalone)').matches || 
+             window.navigator.standalone || 
+             document.referrer.includes('android-app://');
+    }
+
+    // Initialize app
+    window.addEventListener('load', () => {
+      initTheme();
+      updateZoneDisplay();
+      
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById("input-date").value = today;
+      
+      // Set default time to current hour
+      const now = new Date();
+      const currentTime = now.toTimeString().slice(0, 5);
+      document.getElementById("input-time").value = currentTime;
+      
+      generateTable();
+
+      // Add PWA-specific styling if installed
+      if (isStandalone()) {
+        document.body.classList.add('pwa-installed');
+      }
+    });
+  </script>
 </body>
 </html>
