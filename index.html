@@ -615,493 +615,447 @@
   <datalist id="event-tz-list"></datalist>
 
   <script>
-    // In-memory storage for the artifact environment
-    const storage = {
-      zones: [],
-      theme: null,
-      
-      getItem: function(key) {
-        if (key === "timesync-zones") return JSON.stringify(this.zones);
-        if (key === "timesync-theme") return this.theme;
-        return null;
-      },
-      
-      setItem: function(key, value) {
-        if (key === "timesync-zones") this.zones = JSON.parse(value);
-        if (key === "timesync-theme") this.theme = value;
-      }
-    };
+// In-memory storage for the artifact environment
+const storage = {
+  zones: [],
+  theme: null,
+  
+  getItem: function(key) {
+    if (key === "timesync-zones") return JSON.stringify(this.zones);
+    if (key === "timesync-theme") return this.theme;
+    return null;
+  },
+  
+  setItem: function(key, value) {
+    if (key === "timesync-zones") this.zones = JSON.parse(value);
+    if (key === "timesync-theme") this.theme = value;
+  }
+};
 
-    let selectedZones = JSON.parse(storage.getItem("timesync-zones") || "[]");
+let selectedZones = JSON.parse(storage.getItem("timesync-zones") || "[]");
 
-    // Initialize time zone suggestions
-    const ianaTimeZones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [
-      'UTC', // Put UTC first as it's now selectable
-      'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
-      'America/Toronto', 'America/Vancouver', 'America/Mexico_City', 'America/Sao_Paulo',
-      'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Rome', 'Europe/Madrid',
-      'Europe/Amsterdam', 'Europe/Stockholm', 'Europe/Warsaw', 'Europe/Prague',
-      'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Singapore', 'Asia/Seoul',
-      'Asia/Mumbai', 'Asia/Dubai', 'Asia/Bangkok', 'Asia/Jakarta', 'Asia/Manila',
-      'Australia/Sydney', 'Australia/Melbourne', 'Australia/Perth', 'Australia/Brisbane',
-      'Pacific/Auckland', 'Pacific/Honolulu', 'Pacific/Fiji',
-      'Africa/Cairo', 'Africa/Lagos', 'Africa/Johannesburg', 'Africa/Nairobi'
-    ];
+// Initialize time zone suggestions
+const ianaTimeZones = [
+  'UTC',
+  'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
+  'America/Toronto', 'America/Vancouver', 'America/Mexico_City', 'America/Sao_Paulo',
+  'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Rome', 'Europe/Madrid',
+  'Europe/Amsterdam', 'Europe/Stockholm', 'Europe/Warsaw', 'Europe/Prague',
+  'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Singapore', 'Asia/Seoul',
+  'Asia/Mumbai', 'Asia/Dubai', 'Asia/Bangkok', 'Asia/Jakarta', 'Asia/Manila',
+  'Australia/Sydney', 'Australia/Melbourne', 'Australia/Perth', 'Australia/Brisbane',
+  'Pacific/Auckland', 'Pacific/Honolulu', 'Pacific/Fiji',
+  'Africa/Cairo', 'Africa/Lagos', 'Africa/Johannesburg', 'Africa/Nairobi'
+];
 
-    // Add UTC to the beginning if it's not already there (for browsers with full support)
-    if (ianaTimeZones[0] !== 'UTC' && !ianaTimeZones.includes('UTC')) {
-      ianaTimeZones.unshift('UTC');
-    }
+function populateTimezoneList() {
+  const datalist = document.getElementById("tz-list");
+  const eventDatalist = document.getElementById("event-tz-list");
+  
+  const options = ianaTimeZones.slice(0, 20).map(z => `<option value="${z}"></option>`).join("");
+  
+  if (datalist) {
+    datalist.innerHTML = options;
+  }
+  if (eventDatalist) {
+    eventDatalist.innerHTML = options;
+  }
+}
 
-    function populateTimezoneList() {
-      const datalist = document.getElementById("tz-list");
-      const eventDatalist = document.getElementById("event-tz-list");
-      
-      const options = ianaTimeZones.slice(0, 20).map(z => `<option value="${z}"></option>`).join("");
-      
-      if (datalist) {
-        datalist.innerHTML = options;
-      }
-      if (eventDatalist) {
-        eventDatalist.innerHTML = options;
-      }
-    }
+function updateZoneDisplay() {
+  const container = document.getElementById("selected-zones");
+  const wrapper = document.getElementById("selected-zones-container");
+  
+  if (selectedZones.length === 0) {
+    wrapper.style.display = 'none';
+    return;
+  }
+  
+  wrapper.style.display = 'block';
+  container.innerHTML = selectedZones.map(zone => `
+    <div class="zone-chip">
+      <span>${zone.replace('_', ' ')}</span>
+      <button class="remove-btn" onclick="removeZone('${zone}')" title="Remove ${zone}">
+        ✕
+      </button>
+    </div>
+  `).join('');
+}
 
-    function updateZoneDisplay() {
-      const container = document.getElementById("selected-zones");
-      const wrapper = document.getElementById("selected-zones-container");
-      
-      if (selectedZones.length === 0) {
-        wrapper.style.display = 'none';
-        return;
-      }
-      
-      wrapper.style.display = 'block';
-      container.innerHTML = selectedZones.map(zone => `
-        <div class="zone-chip">
-          <span>${zone.replace('_', ' ')}</span>
-          <button class="remove-btn" onclick="removeZone('${zone}')" title="Remove ${zone}">
-            ✕
-          </button>
-        </div>
-      `).join('');
-    }
+function initTheme() {
+  const saved = storage.getItem("timesync-theme");
+  if (saved === "dark" || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.body.setAttribute('data-theme', 'dark');
+  }
+}
 
-    // Initialize theme
-    function initTheme() {
-      const saved = storage.getItem("timesync-theme");
-      if (saved === "dark" || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.body.setAttribute('data-theme', 'dark');
-      }
-    }
+function toggleDarkMode() {
+  const body = document.body;
+  const isDark = body.getAttribute('data-theme') === 'dark';
+  body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  storage.setItem("timesync-theme", isDark ? 'light' : 'dark');
+}
 
-    function toggleDarkMode() {
-      const body = document.body;
-      const isDark = body.getAttribute('data-theme') === 'dark';
-      body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      storage.setItem("timesync-theme", isDark ? 'light' : 'dark');
-    }
-
-    function addZone() {
-      const input = document.getElementById("zone-input");
-      if (!input) return;
-      
-      let zone = input.value.trim();
-      
-      if (!zone) {
-        input.focus();
-        return;
-      }
-      
-      if (selectedZones.includes(zone)) {
-        console.log(`⚠️ ${zone} is already added`);
-        input.value = "";
-        input.focus();
-        return;
-      }
-      
-      // Try some common variations
-      const zonesToTry = [
-        zone,
-        zone.replace(/\s+/g, '_'),
-        zone.replace(/_/g, ' '),
-        zone.split('/').map(part => 
-          part.split('_').map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-          ).join('_')
-        ).join('/'),
-        zone.toUpperCase() === 'EST' ? 'America/New_York' : zone,
-        zone.toUpperCase() === 'PST' ? 'America/Los_Angeles' : zone,
-        zone.toUpperCase() === 'MST' ? 'America/Denver' : zone,
-        zone.toUpperCase() === 'CST' ? 'America/Chicago' : zone,
-        zone.toUpperCase() === 'GMT' ? 'Europe/London' : zone,
-        zone.toUpperCase() === 'UTC' ? 'UTC' : zone
-      ];
-      
-      let validZone = null;
-      for (const testZone of zonesToTry) {
-        try {
-          if (testZone === 'UTC') {
-            // UTC is always valid
-            validZone = 'UTC';
-            console.log(`Valid time zone found: UTC`);
-            break;
-          } else {
-            new Intl.DateTimeFormat("en-US", { timeZone: testZone }).format(new Date());
-            validZone = testZone;
-            console.log(`Valid time zone found: ${testZone}`);
-            break;
-          }
-        } catch (e) {
-          console.log(`Invalid time zone: ${testZone}`);
-        }
-      }
-      
-      if (validZone) {
-        selectedZones.push(validZone);
-        storage.setItem("timesync-zones", JSON.stringify(selectedZones));
-        input.value = "";
-        input.focus();
-        updateZoneDisplay();
-        console.log('About to generate table after adding zone:', validZone);
-        generateTable();
-        console.log(`✅ Added ${validZone}`);
+function addZone() {
+  const input = document.getElementById("zone-input");
+  if (!input) return;
+  
+  let zone = input.value.trim();
+  
+  if (!zone) {
+    input.focus();
+    return;
+  }
+  
+  if (selectedZones.includes(zone)) {
+    console.log(`⚠️ ${zone} is already added`);
+    input.value = "";
+    input.focus();
+    return;
+  }
+  
+  const zonesToTry = [
+    zone,
+    zone.replace(/\s+/g, '_'),
+    zone.replace(/_/g, ' '),
+    zone.split('/').map(part => 
+      part.split('_').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ).join('_')
+    ).join('/'),
+    zone.toUpperCase() === 'EST' ? 'America/New_York' : zone,
+    zone.toUpperCase() === 'PST' ? 'America/Los_Angeles' : zone,
+    zone.toUpperCase() === 'MST' ? 'America/Denver' : zone,
+    zone.toUpperCase() === 'CST' ? 'America/Chicago' : zone,
+    zone.toUpperCase() === 'GMT' ? 'Europe/London' : zone,
+    zone.toUpperCase() === 'UTC' ? 'UTC' : zone
+  ];
+  
+  let validZone = null;
+  for (const testZone of zonesToTry) {
+    try {
+      if (testZone === 'UTC') {
+        validZone = 'UTC';
+        console.log(`Valid time zone found: UTC`);
+        break;
       } else {
-        console.log(`Failed to validate any variation of: ${zone}`);
-        console.log(`❌ Invalid time zone: "${zone}". Try selecting from dropdown suggestions.`);
-        input.focus();
-        input.select();
+        new Intl.DateTimeFormat("en-US", { timeZone: testZone }).format(new Date());
+        validZone = testZone;
+        console.log(`Valid time zone found: ${testZone}`);
+        break;
       }
+    } catch (e) {
+      console.log(`Invalid time zone: ${testZone}`);
     }
+  }
+  
+  if (validZone) {
+    selectedZones.push(validZone);
+    storage.setItem("timesync-zones", JSON.stringify(selectedZones));
+    input.value = "";
+    input.focus();
+    updateZoneDisplay();
+    console.log('About to generate table after adding zone:', validZone);
+    generateTable();
+    console.log(`✅ Added ${validZone}`);
+  } else {
+    console.log(`Failed to validate any variation of: ${zone}`);
+    console.log(`❌ Invalid time zone: "${zone}". Try selecting from dropdown suggestions.`);
+    input.focus();
+    input.select();
+  }
+}
 
-    function removeZone(zone) {
-      selectedZones = selectedZones.filter(z => z !== zone);
-      storage.setItem("timesync-zones", JSON.stringify(selectedZones));
-      updateZoneDisplay();
-      generateTable();
+function removeZone(zone) {
+  selectedZones = selectedZones.filter(z => z !== zone);
+  storage.setItem("timesync-zones", JSON.stringify(selectedZones));
+  updateZoneDisplay();
+  generateTable();
+}
+
+function utcToZonedTime(date, timeZone) {
+  const localString = date.toLocaleString('en-US', {
+    timeZone: timeZone,
+    hour12: false
+  });
+
+  const [datePart, timePart] = localString.split(', ');
+  const [month, day, year] = datePart.split('/');
+  const [hour, minute, second = '00'] = timePart.split(':');
+
+  return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:${second.padStart(2, '0')}`);
+}
+
+function generateTable() {
+  console.log('🚀 NEW generateTable called');
+  const dateInput = document.getElementById("input-date");
+  const timeInput = document.getElementById("input-time");
+  const eventTimezoneInput = document.getElementById("event-timezone");
+  const durationInput = document.getElementById("input-duration");
+  const table = document.getElementById("timezone-table");
+  const emptyState = document.getElementById("empty-state");
+  
+  if (!dateInput || !timeInput || !eventTimezoneInput || !durationInput || !table || !emptyState) {
+    console.log("❌ Required DOM elements not found");
+    return;
+  }
+  
+  const dateStr = dateInput.value;
+  const timeStr = timeInput.value;
+  const eventTimezone = eventTimezoneInput.value.trim();
+  const durationHours = parseInt(durationInput.value || "4");
+  
+  console.log('📊 Inputs:', {
+    date: dateStr,
+    time: timeStr, 
+    eventTz: eventTimezone,
+    duration: durationHours
+  });
+  
+  // Show empty state if missing critical info
+  if (!dateStr || !timeStr || !eventTimezone) {
+    console.log('❌ Missing required fields - showing empty state');
+    table.style.display = 'none';
+    emptyState.style.display = 'block';
+    return;
+  }
+  
+  // Validate event timezone
+  let validEventTimezone = null;
+  try {
+    if (eventTimezone === 'UTC') {
+      validEventTimezone = 'UTC';
+    } else {
+      new Intl.DateTimeFormat("en-US", { timeZone: eventTimezone }).format(new Date());
+      validEventTimezone = eventTimezone;
     }
+    console.log('✅ Valid event timezone:', validEventTimezone);
+  } catch (e) {
+    console.log('❌ Invalid event timezone:', eventTimezone);
+    table.style.display = 'none';
+    emptyState.style.display = 'block';
+    return;
+  }
+  
+  // CREATE EVENT TIME - this is the key fix!
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  
+  let eventTimeUTC;
+  if (validEventTimezone === 'UTC') {
+    eventTimeUTC = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+  } else {
+    // Simple approach: create date in event timezone
+    const eventDate = new Date(year, month - 1, day, hours, minutes);
+    const utcDate = new Date(eventDate.toLocaleString('en-US', { timeZone: 'UTC' }));
+    const tzDate = new Date(eventDate.toLocaleString('en-US', { timeZone: validEventTimezone }));
+    const offset = utcDate.getTime() - tzDate.getTime();
+    eventTimeUTC = new Date(eventDate.getTime() + offset);
+  }
 
-    function utcToZonedTime(date, timeZone) {
-      const localString = date.toLocaleString('en-US', {
-        timeZone: timeZone,
-        hour12: false
-      });
+  console.log('🕐 Event time UTC:', eventTimeUTC.toISOString());
 
-      const [datePart, timePart] = localString.split(', ');
-      const [month, day, year] = datePart.split('/');
-      const [hour, minute, second = '00'] = timePart.split(':');
+  // SHOW TABLE - this should always happen now!
+  console.log('✅ Showing table with event timezone');
+  table.style.display = 'table';
+  emptyState.style.display = 'none';
 
-      return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:${second.padStart(2, '0')}`);
+  const tableHead = document.querySelector("#timezone-table thead");
+  const tableBody = document.querySelector("#timezone-table tbody");
+  
+  if (!tableHead || !tableBody) {
+    console.log("❌ Table elements not found");
+    return;
+  }
+  
+  tableHead.innerHTML = "";
+  tableBody.innerHTML = "";
+
+  // CREATE HEADER - Event timezone FIRST, then viewers
+  const headRow = document.createElement("tr");
+  const eventDisplayName = validEventTimezone === 'UTC' ? 'UTC' : validEventTimezone.split('/').pop().replace('_', ' ');
+  
+  let headerContent = `<th style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">📍 ${eventDisplayName}<br><small>Event Time</small></th>`;
+  console.log('📍 Added event header:', eventDisplayName);
+  
+  // Add viewer columns
+  selectedZones.forEach(zone => {
+    const displayName = zone === 'UTC' ? 'UTC' : zone.split('/').pop().replace('_', ' ');
+    headerContent += `<th>👥 ${displayName}<br><small>Viewer</small></th>`;
+    console.log('👥 Added viewer header:', displayName);
+  });
+  
+  headRow.innerHTML = headerContent;
+  tableHead.appendChild(headRow);
+
+  // CREATE ROWS
+  const totalSlots = durationHours * 2;
+  console.log(`📊 Generating ${totalSlots} time slots`);
+
+  for (let i = 0; i < totalSlots; i++) {
+    const utcTime = new Date(eventTimeUTC.getTime() + i * 30 * 60 * 1000);
+    const row = document.createElement("tr");
+    let cells = [];
+
+    // EVENT CELL (always first)
+    let eventLocalTime;
+    if (validEventTimezone === 'UTC') {
+      eventLocalTime = utcTime;
+    } else {
+      eventLocalTime = utcToZonedTime(utcTime, validEventTimezone);
     }
+    
+    const eventHour = eventLocalTime.getHours();
+    const eventLabel = eventLocalTime.toTimeString().slice(0, 5);
+    const eventDay = eventLocalTime.toLocaleDateString('en-US', { 
+      weekday: 'short', month: 'short', day: 'numeric' 
+    });
+    
+    const eventClass = (eventHour >= 8 && eventHour < 17) ? "work" : 
+                      (eventHour < 6 || eventHour >= 22) ? "sleep" : "off";
+    
+    cells.push(`<td class="time-cell ${eventClass}" style="font-weight: bold; border-left: 4px solid #667eea;">${eventLabel}<br><small>${eventDay}</small></td>`);
 
-    function generateTable() {
-      console.log('generateTable called');
-      const dateInput = document.getElementById("input-date");
-      const timeInput = document.getElementById("input-time");
-      const durationInput = document.getElementById("input-duration");
-      const table = document.getElementById("timezone-table");
-      const emptyState = document.getElementById("empty-state");
-      
-      // Check if all required elements exist
-      if (!dateInput || !timeInput || !durationInput || !table || !emptyState) {
-        console.log("Required DOM elements not yet available", {
-          dateInput: !!dateInput,
-          timeInput: !!timeInput,
-          durationInput: !!durationInput,
-          table: !!table,
-          emptyState: !!emptyState
-        });
-        return;
-      }
-      
-      const dateStr = dateInput.value;
-      const timeStr = timeInput.value;
-      const durationHours = parseInt(durationInput.value || "4");
-      
-      // Convert local time input to UTC for calculations
-      const localTimeToUTC = (localTimeStr, dateStr) => {
-        if (!localTimeStr || !dateStr) return null;
-        
-        const [year, month, day] = dateStr.split("-").map(Number);
-        const [hours, minutes] = localTimeStr.split(":").map(Number);
-        
-        // Create date in user's local timezone
-        const localDate = new Date(year, month - 1, day, hours, minutes);
-        
-        // Return UTC equivalent
-        return new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
-      };
-      
-      const startUTC = localTimeToUTC(timeStr, dateStr);
-      
-      console.log('Input values:', {
-        dateStr,
-        timeStr: `${timeStr} (local)`,
-        startUTC: startUTC ? startUTC.toISOString().slice(11, 16) + ' (UTC)' : 'invalid',
-        durationHours,
-        selectedZonesCount: selectedZones.length,
-        selectedZones: selectedZones
-      });
-      
-      if (!dateStr || !timeStr || !startUTC || selectedZones.length === 0) {
-        console.log('Showing empty state - missing date/time or no zones selected');
-        table.style.display = 'none';
-        emptyState.style.display = 'block';
-        return;
-      }
-      
-      // Show table only when we have zones
-      console.log('Generating table with zones...');
-      table.style.display = 'table';
-      emptyState.style.display = 'none';
-
-      console.log('Start UTC time:', startUTC);
-
-      const tableHead = document.querySelector("#timezone-table thead");
-      const tableBody = document.querySelector("#timezone-table tbody");
-      
-      if (!tableHead || !tableBody) {
-        console.log("Table elements not found");
-        return;
-      }
-      
-      tableHead.innerHTML = "";
-      tableBody.innerHTML = "";
-
-      // Create header - only show selected time zones
-      const headRow = document.createElement("tr");
-      let headerContent = "";
-      
-      selectedZones.forEach(zone => {
-        const offsetDate = new Date();
-        let label = "";
-        let displayName = "";
-        
-        if (zone === "UTC") {
-          label = "UTC";
-          displayName = "UTC";
-        } else {
-          const formatter = new Intl.DateTimeFormat("en-US", {
-            timeZone: zone,
-            timeZoneName: "shortOffset"
-          }).formatToParts(offsetDate);
-          const offsetPart = formatter.find(p => p.type === "timeZoneName")?.value || "";
-          
-          const jan = new Date(startUTC.getFullYear(), 0, 1);
-          const jul = new Date(startUTC.getFullYear(), 6, 1);
-          const janOffset = jan.getTimezoneOffset();
-          const julOffset = jul.getTimezoneOffset();
-          const isDST = Math.max(janOffset, julOffset) !== offsetDate.getTimezoneOffset();
-          
-          label = offsetPart.replace("GMT", "UTC") + (isDST ? "*" : "");
-          displayName = zone.split('/').pop().replace('_', ' ');
-        }
-        
-        headerContent += `<th>${displayName}<br><small>${label}</small></th>`;
-      });
-      
-      headRow.innerHTML = headerContent;
-      tableHead.appendChild(headRow);
-      console.log('Table header created');
-
-      const totalSlots = durationHours * 2;
-      console.log('Generating', totalSlots, 'time slots');
-
-      // Generate time slots
-      for (let i = 0; i < totalSlots; i++) {
-        const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
+    // VIEWER CELLS
+    selectedZones.forEach(zone => {
+      if (zone === "UTC") {
         const utcHour = utcTime.getUTCHours();
         const utcLabel = utcTime.toISOString().slice(11, 16);
         const utcDay = utcTime.toLocaleDateString('en-US', { 
-          weekday: 'short', 
-          month: 'short', 
-          day: 'numeric' 
+          weekday: 'short', month: 'short', day: 'numeric' 
         });
         
-        const row = document.createElement("tr");
-        let smartZones = [];
-        let cells = [];
-
-        selectedZones.forEach(zone => {
-          if (zone === "UTC") {
-            // Handle UTC specially
-            const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : 
-                            (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
-            
-            if (utcClass === "work") smartZones.push(zone);
-            
-            cells.push(`<td class="time-cell ${utcClass}">${utcLabel}<br><small>${utcDay}</small></td>`);
-          } else {
-            // Handle regular time zones
-            const local = utcToZonedTime(utcTime, zone);
-            const localHour = local.getHours();
-            const localLabel = local.toTimeString().slice(0, 5);
-            const localDay = local.toLocaleDateString('en-US', { 
-              weekday: 'short', 
-              month: 'short', 
-              day: 'numeric' 
-            });
-            
-            const cls = (localHour >= 8 && localHour < 17) ? "work" : 
-                        (localHour < 6 || localHour >= 22) ? "sleep" : "off";
-            
-            if (cls === "work") smartZones.push(zone);
-            
-            cells.push(`<td class="time-cell ${cls}">${localLabel}<br><small>${localDay}</small></td>`);
-          }
-        });
-
-        // Highlight as optimal if ALL selected zones are in work hours
-        if (selectedZones.length > 1 && smartZones.length === selectedZones.length) {
-          row.classList.add("smart-slot");
-        }
-
-        row.innerHTML = cells.join("");
-        tableBody.appendChild(row);
-      }
-      
-      console.log('Table generation complete');
-    }
-
-    function exportPDF() {
-      window.print();
-    }
-
-    function shareSchedule() {
-      if (navigator.share && selectedZones.length > 0) {
-        const zones = selectedZones.join(', ');
-        const date = document.getElementById("input-date").value;
-        const time = document.getElementById("input-time").value;
+        const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : 
+                        (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
         
-        navigator.share({
-          title: 'TimeSync Meeting Schedule',
-          text: `Meeting scheduled for ${date} at ${time} UTC across time zones: ${zones}`,
-          url: window.location.href
-        });
+        cells.push(`<td class="time-cell ${utcClass}">${utcLabel}<br><small>${utcDay}</small></td>`);
       } else {
-        const url = window.location.href;
-        navigator.clipboard.writeText(url).then(() => {
-          console.log('📋 Schedule link copied to clipboard!');
-        }).catch(() => {
-          const textArea = document.createElement('textarea');
-          textArea.value = url;
-          document.body.appendChild(textArea);
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-          console.log('📋 Schedule link copied!');
-        });
-      }
-    }
-
-    // Detect if app is installed
-    function isStandalone() {
-      return window.matchMedia('(display-mode: standalone)').matches || 
-             window.navigator.standalone || 
-             document.referrer.includes('android-app://');
-    }
-
-    // Initialize app
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM Content Loaded');
-      
-      console.log('=== CHECKING DOM ELEMENTS ===');
-      console.log('Date input:', !!document.getElementById("input-date"));
-      console.log('Time input:', !!document.getElementById("input-time"));  
-      console.log('Event timezone input:', !!document.getElementById("event-timezone"));
-      console.log('Duration input:', !!document.getElementById("input-duration"));
-      console.log('Zone input:', !!document.getElementById("zone-input"));
-      console.log('Table:', !!document.getElementById("timezone-table"));
-      console.log('Empty state:', !!document.getElementById("empty-state"));
-      
-      initTheme();
-      updateZoneDisplay();
-      populateTimezoneList();
-      
-      const today = new Date().toISOString().split('T')[0];
-      const dateInput = document.getElementById("input-date");
-      if (dateInput) {
-        dateInput.value = today;
-        dateInput.addEventListener("change", generateTable);
-        console.log('Date input set and listener added');
-      }
-      
-      const now = new Date();
-      const currentTime = now.toTimeString().slice(0, 5);
-      const timeInput = document.getElementById("input-time");
-      if (timeInput) {
-        timeInput.value = currentTime;
-        timeInput.addEventListener("change", generateTable);
-        console.log('Time input set and listener added');
-      }
-      
-      const durationInput = document.getElementById("input-duration");
-      if (durationInput) {
-        durationInput.addEventListener("change", generateTable);
-        console.log('Duration input listener added');
-      } else {
-        console.log('ERROR: No duration input found!');
-      }
-      
-      const eventTimezoneInput = document.getElementById("event-timezone");
-      if (eventTimezoneInput) {
-        // Default to user's timezone
-        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        eventTimezoneInput.value = userTimezone;
-        eventTimezoneInput.addEventListener("change", function() {
-          console.log('Event timezone changed to:', this.value);
-          generateTable();
-        });
-        eventTimezoneInput.addEventListener("input", function() {
-          console.log('Event timezone input:', this.value);
-          const input = this.value.toLowerCase();
-          const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
-          
-          let datalist = document.getElementById("event-tz-list");
-          if (datalist) {
-            datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}"></option>`).join("");
-          }
-        });
-        console.log('Event timezone set to user timezone:', userTimezone);
-      } else {
-        console.log('ERROR: Event timezone input not found!');
-      }
-      
-      const zoneInput = document.getElementById("zone-input");
-      if (zoneInput) {
-        zoneInput.addEventListener("keypress", function(e) {
-          if (e.key === 'Enter') {
-            addZone();
-          }
+        const local = utcToZonedTime(utcTime, zone);
+        const localHour = local.getHours();
+        const localLabel = local.toTimeString().slice(0, 5);
+        const localDay = local.toLocaleDateString('en-US', { 
+          weekday: 'short', month: 'short', day: 'numeric' 
         });
         
-        zoneInput.addEventListener("input", function() {
-          const input = this.value.toLowerCase();
-          const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
-          
-          let datalist = document.getElementById("tz-list");
-          if (datalist) {
-            datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}"></option>`).join("");
-          }
-        });
-
-        zoneInput.addEventListener("focus", function() {
-          populateTimezoneList();
-        });
+        const cls = (localHour >= 8 && localHour < 17) ? "work" : 
+                    (localHour < 6 || localHour >= 22) ? "sleep" : "off";
         
-        console.log('Zone input listeners added');
-      }
-      
-      // Generate initial table
-      setTimeout(() => {
-        console.log('Attempting initial table generation...');
-        generateTable();
-      }, 300); // Increased timeout to ensure all elements are ready
-
-      if (isStandalone()) {
-        document.body.classList.add('pwa-installed');
+        cells.push(`<td class="time-cell ${cls}">${localLabel}<br><small>${localDay}</small></td>`);
       }
     });
+
+    row.innerHTML = cells.join("");
+    tableBody.appendChild(row);
+  }
+  
+  console.log('✅ Table generation complete!');
+}
+
+function exportPDF() {
+  window.print();
+}
+
+function shareSchedule() {
+  const zones = selectedZones.join(', ');
+  const date = document.getElementById("input-date").value;
+  const time = document.getElementById("input-time").value;
+  const eventTz = document.getElementById("event-timezone").value;
+  
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    console.log('📋 Schedule link copied to clipboard!');
+  }).catch(() => {
+    console.log('📋 Could not copy to clipboard');
+  });
+}
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || 
+         window.navigator.standalone || 
+         document.referrer.includes('android-app://');
+}
+
+// INITIALIZATION
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 TimeSync DOM loaded');
+  
+  initTheme();
+  updateZoneDisplay();
+  populateTimezoneList();
+  
+  // Set defaults
+  const today = new Date().toISOString().split('T')[0];
+  const currentTime = new Date().toTimeString().slice(0, 5);
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  
+  const dateInput = document.getElementById("input-date");
+  const timeInput = document.getElementById("input-time");
+  const eventTimezoneInput = document.getElementById("event-timezone");
+  
+  if (dateInput) {
+    dateInput.value = today;
+    dateInput.addEventListener("change", generateTable);
+  }
+  
+  if (timeInput) {
+    timeInput.value = currentTime;
+    timeInput.addEventListener("change", generateTable);
+  }
+  
+  if (eventTimezoneInput) {
+    eventTimezoneInput.value = userTimezone;
+    eventTimezoneInput.addEventListener("change", () => {
+      console.log('🌍 Event timezone changed to:', eventTimezoneInput.value);
+      generateTable();
+    });
+    eventTimezoneInput.addEventListener("input", function() {
+      const input = this.value.toLowerCase();
+      const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+      
+      let datalist = document.getElementById("event-tz-list");
+      if (datalist) {
+        datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}"></option>`).join("");
+      }
+    });
+  }
+  
+  // Duration and zone inputs
+  const durationInput = document.getElementById("input-duration");
+  if (durationInput) {
+    durationInput.addEventListener("change", generateTable);
+  }
+  
+  const zoneInput = document.getElementById("zone-input");
+  if (zoneInput) {
+    zoneInput.addEventListener("keypress", function(e) {
+      if (e.key === 'Enter') {
+        addZone();
+      }
+    });
+    
+    zoneInput.addEventListener("input", function() {
+      const input = this.value.toLowerCase();
+      const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+      
+      let datalist = document.getElementById("tz-list");
+      if (datalist) {
+        datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}"></option>`).join("");
+      }
+    });
+
+    zoneInput.addEventListener("focus", populateTimezoneList);
+  }
+  
+  // Generate initial table after everything is set up
+  setTimeout(() => {
+    console.log('🔄 Initial table generation...');
+    generateTable();
+  }, 500);
+
+  if (isStandalone()) {
+    document.body.classList.add('pwa-installed');
+  }
+});
   </script>
 </body>
 </html>
