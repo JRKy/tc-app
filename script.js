@@ -7,6 +7,18 @@ function format(date, token) {
 }
 
 function utcToZonedTime(date, timeZone) {
+  const localString = date.toLocaleString('en-US', {
+    timeZone: timeZone,
+    hour12: false
+  });
+
+  // Split "MM/DD/YYYY, HH:MM:SS" into parts
+  const [datePart, timePart] = localString.split(', ');
+  const [month, day, year] = datePart.split('/');
+  const [hour, minute, second = '00'] = timePart.split(':');
+
+  return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:${second.padStart(2, '0')}`);
+}
   const invdate = new Date(date.toLocaleString('en-US', { timeZone }));
   const diff = date.getTime() - invdate.getTime();
   return new Date(date.getTime() + diff);
