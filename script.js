@@ -153,7 +153,8 @@ window.onload = () => {
   updateZoneDisplay();
   generateTable(true);
   applyTheme();
-};
+
+  setTimeout(() => generateTable(true), 10); };
 
 document.getElementById("input-date").addEventListener("change", generateTable);
 document.getElementById("input-time").addEventListener("change", generateTable);
@@ -182,7 +183,7 @@ function generateTable(autoTriggered = false) {
   headRow.innerHTML = (showUTC ? '<th class="utc-header">UTC</th>' : "") +
     selectedZones.map(zone => {
 
-    const now = new Date();
+    const now = utcTime;
     const formatter = new Intl.DateTimeFormat("en-US", {
       timeZone: zone,
       timeZoneName: "shortOffset"
@@ -196,7 +197,13 @@ function generateTable(autoTriggered = false) {
       jan.getTimezoneOffset(),
       jul.getTimezoneOffset()
     );
-    const isDST = now.getTimezoneOffset() < stdOffset;
+    
+    const stdOffset = Math.max(
+      new Date(utcTime.getFullYear(), 0, 1).getTimezoneOffset(),
+      new Date(utcTime.getFullYear(), 6, 1).getTimezoneOffset()
+    );
+    const isDST = utcTime.getTimezoneOffset() < stdOffset;
+    
     
     return `<th>${zone} (${offset}${isDST ? "*" : ""})</th>`;
   }).join("");
