@@ -794,15 +794,15 @@
         selectedZones: selectedZones
       });
       
-      if (!dateStr || !timeStr) {
-        console.log('Showing empty state - missing date or time');
+      if (!dateStr || !timeStr || selectedZones.length === 0) {
+        console.log('Showing empty state - missing date/time or no zones selected');
         table.style.display = 'none';
         emptyState.style.display = 'block';
         return;
       }
       
-      // Show table (with or without zones)
-      console.log('Generating table...');
+      // Show table only when we have zones
+      console.log('Generating table with zones...');
       table.style.display = 'table';
       emptyState.style.display = 'none';
 
