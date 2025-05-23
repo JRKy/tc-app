@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Time Zone Planner</title>
@@ -10,8 +11,8 @@
 </head>
 <body>
   <h1>Time Zone Planner</h1>
-  <button class="toggle-mode" onclick="toggleDarkMode()">🌗 Toggle Dark Mode</button>
-<button class="toggle-mode" onclick="exportPDF()">📄 Export PDF</button>
+  <button class="toggle-mode" onclick="toggleDarkMode()"><span class="material-icons">dark_mode</span></button>
+<button class="toggle-mode" onclick="exportPDF()"><span class="material-icons">download</span></button>
 <div class="controls">
     <label>Date: <input type="date" id="input-date" /></label>
     <label>Time (UTC): <input type="time" id="input-time" step="1800" /></label>
