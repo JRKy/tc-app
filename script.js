@@ -7,7 +7,7 @@ function format(date, token) {
 }
 
 function utcToZonedTime(date, timeZone) {
-  const invdate = new Date(date.toLocaleString('en-US', { timeZone }));
+  const invdate = new Date(date.toLocaleString('en-US', { timeZone: timeZone }));
   const diff = date.getTime() - invdate.getTime();
   return new Date(date.getTime() + diff);
 }
@@ -76,7 +76,19 @@ function renderZones() {
 
   // Header
   const headRow = document.createElement("tr");
-  headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
+  
+    headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
+      const offset = -1 * new Date().getTimezoneOffset();
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: zone,
+        timeZoneName: 'shortOffset'
+      });
+      const parts = formatter.formatToParts(new Date());
+      const offsetPart = parts.find(p => p.type === "timeZoneName");
+      const label = offsetPart ? offsetPart.value.replace("GMT", "UTC") : "";
+      return `<th>${zone} (${label}) <button onclick="removeZone('${zone}')">❌</button></th>`;
+    }).join("");
+
     return `<th>${zone} <button onclick="removeZone('${zone}')">❌</button></th>`;
   }).join("");
   tableHead.appendChild(headRow);
@@ -95,7 +107,11 @@ function renderZones() {
     let rowHTML = `<td>${utcLabel}</td>`;
     rowHTML += selectedZones.map(zone => {
       const local = utcToZonedTime(utcTime, zone);
-      const localTimeStr = format(local, "HH:mm");
+      
+    const localTimeStr = format(local, "HH:mm");
+    const dayShift = local.getUTCDate() - utcTime.getUTCDate();
+    const shiftMarker = dayShift === 1 ? " +1" : dayShift === -1 ? " -1" : "";
+    
       const localHour = parseInt(format(local, "HH"), 10);
       const classes = [];
 
@@ -110,7 +126,7 @@ function renderZones() {
         classes.push("now-cell");
       }
 
-      return `<td class="${classes.join(" ")}">${localTimeStr}</td>`;
+      return `<td class="${classes.join(" ")}">${localTimeStr}${shiftMarker}</td>`;
     }).join("");
 
     row.innerHTML = rowHTML;
