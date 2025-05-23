@@ -588,8 +588,8 @@
         </div>
 
         <div class="legend">
-          <div class="legend-item work">💼 Work Hours (8AM - 5PM)</div>
-          <div class="legend-item sleep">🌙 Sleep Hours (10PM - 6AM)</div>
+          <div class="legend-item work">💼 Work Hours (08:00 - 16:59)</div>
+          <div class="legend-item sleep">🌙 Sleep Hours (22:00 - 05:59)</div>
           <div class="legend-item off">🕐 Off Hours</div>
           <div class="legend-item smart">✨ Optimal Event Time</div>
           <div class="legend-item">💡 * indicates Daylight Saving Time</div>
@@ -903,19 +903,33 @@ function generateTable() {
       eventLocalTime = utcToZonedTime(utcTime, validEventTimezone);
     }
     
-    const eventHour = eventLocalTime.getHours();
-    const eventLabel = eventLocalTime.toTimeString().slice(0, 5);
-    const eventDay = eventLocalTime.toLocaleDateString('en-US', { 
-      weekday: 'short', month: 'short', day: 'numeric' 
-    });
-    
-    const eventClass = (eventHour >= 8 && eventHour < 17) ? "work" : 
-                      (eventHour < 6 || eventHour >= 22) ? "sleep" : "off";
-    
     // Use the original input time for the first slot, then increment by 30 minutes
     const baseTime = new Date(`${dateStr}T${timeStr}`);
     const slotTime = new Date(baseTime.getTime() + i * 30 * 60 * 1000);
     const displayTime = slotTime.toTimeString().slice(0, 5);
+    const eventDay = slotTime.toLocaleDateString('en-US', { 
+      weekday: 'short', month: 'short', day: 'numeric' 
+    });
+    
+    // Calculate work hours using the event timezone time
+    let eventHour;
+    if (validEventTimezone === 'UTC') {
+      eventHour = utcTime.getUTCHours();
+    } else {
+      eventHour = eventLocalTime.getHours();
+    }
+    const eventMinute = eventLocalTime.getMinutes();
+    const eventClass = (eventHour >= 8 && eventHour < 17) ? "work" : 
+                      (eventHour >= 22 || eventHour < 6) ? "sleep" : "off";
+    
+    // Debug log for event timezone
+    console.log('Event timezone time:', {
+      timezone: validEventTimezone,
+      hour: eventHour,
+      minute: eventMinute,
+      class: eventClass,
+      displayTime: displayTime
+    });
     
     cells.push(`<td class="time-cell ${eventClass}" style="font-weight: bold; border-left: 4px solid #667eea;">${displayTime}<br><small>${eventDay}</small></td>`);
 
@@ -923,34 +937,37 @@ function generateTable() {
     selectedZones.forEach(zone => {
       if (zone === "UTC") {
         const utcHour = utcTime.getUTCHours();
-        const utcLabel = utcTime.toISOString().slice(11, 16);
+        const utcMinute = utcTime.getUTCMinutes();
+        const utcLabel = `${String(utcHour).padStart(2, '0')}:${String(utcMinute).padStart(2, '0')}`;
         const utcDay = utcTime.toLocaleDateString('en-US', { 
           weekday: 'short', month: 'short', day: 'numeric' 
         });
         
         const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : 
-                        (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
+                        (utcHour >= 22 || utcHour < 6) ? "sleep" : "off";
         
         cells.push(`<td class="time-cell ${utcClass}">${utcLabel}<br><small>${utcDay}</small></td>`);
       } else {
         const local = utcToZonedTime(utcTime, zone);
         const localHour = local.getHours();
-        const localLabel = local.toTimeString().slice(0, 5);
+        const localMinute = local.getMinutes();
+        const localLabel = `${String(localHour).padStart(2, '0')}:${String(localMinute).padStart(2, '0')}`;
         const localDay = local.toLocaleDateString('en-US', { 
           weekday: 'short', month: 'short', day: 'numeric' 
         });
         
         const cls = (localHour >= 8 && localHour < 17) ? "work" : 
-                    (localHour < 6 || localHour >= 22) ? "sleep" : "off";
+                    (localHour >= 22 || localHour < 6) ? "sleep" : "off";
         
         cells.push(`<td class="time-cell ${cls}">${localLabel}<br><small>${localDay}</small></td>`);
       }
     });
 
     // Check if this is a smart slot (all timezones are in work hours)
-    const isSmartSlot = cells.every((cell, index) => {
-      if (index === 0) return true; // Skip event time column
-      return cell.includes('class="time-cell work"');
+    const isSmartSlot = selectedZones.length > 0 && cells.every((cell, index) => {
+      const timeStr = cell.match(/(\d{2}):(\d{2})/)[0];
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours >= 8 && hours < 17;
     });
 
     if (isSmartSlot) {
@@ -1016,11 +1033,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   if (eventTimezoneInput) {
-    eventTimezoneInput.value = "";
+    eventTimezoneInput.value = ""; // Clear the timezone input initially
     eventTimezoneInput.placeholder = "Select event timezone (e.g., " + userTimezone + ")";
     eventTimezoneInput.addEventListener("change", () => {
       console.log('🌍 Event timezone changed to:', eventTimezoneInput.value);
-      generateTable();
+      if (eventTimezoneInput.value) {
+        generateTable();
+      }
     });
     eventTimezoneInput.addEventListener("input", function() {
       const input = this.value.toLowerCase();
@@ -1059,12 +1078,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     zoneInput.addEventListener("focus", populateTimezoneList);
   }
-  
-  // Generate initial table after everything is set up
-  setTimeout(() => {
-    console.log('🔄 Initial table generation...');
-    generateTable();
-  }, 500);
 
   if (isStandalone()) {
     document.body.classList.add('pwa-installed');
