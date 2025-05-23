@@ -1,3 +1,6 @@
+// Get list of all IANA time zones (modern browsers only)
+const ianaTimeZones = Intl.supportedValuesOf("timeZone");
+
 let selectedZones = [];
 
 function generateTable(autoTriggered = false) {
