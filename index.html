@@ -805,6 +805,7 @@
     function generateTable() {
       const dateStr = document.getElementById("input-date").value;
       const timeStr = document.getElementById("input-time").value;
+      const durationHours = parseInt(document.getElementById("time-duration").value);
       const table = document.getElementById("timezone-table");
       const emptyState = document.getElementById("empty-state");
       
@@ -850,8 +851,11 @@
       }).join("");
       tableHead.appendChild(headRow);
 
-      // Generate 48 half-hour slots
-      for (let i = 0; i < 48; i++) {
+      // Calculate number of slots based on duration
+      const totalSlots = durationHours * 2; // 30-minute intervals
+
+      // Generate time slots
+      for (let i = 0; i < totalSlots; i++) {
         const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
         const utcHour = utcTime.getUTCHours();
         const utcLabel = utcTime.toISOString().slice(11, 16);
@@ -1017,6 +1021,7 @@
     // Event listeners
     document.getElementById("input-date").addEventListener("change", generateTable);
     document.getElementById("input-time").addEventListener("change", generateTable);
+    document.getElementById("time-duration").addEventListener("change", generateTable);
     document.getElementById("zone-input").addEventListener("keypress", function(e) {
       if (e.key === 'Enter') {
         addZone();
