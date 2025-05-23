@@ -25,22 +25,6 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720'><rect width='1280' height='720' fill='%23f7fafc'/><text x='640' y='360' text-anchor='middle' fill='%23667eea' font-size='48' font-family='Arial'>TimeSync Desktop View</text></svg>",
-      "sizes": "1280x720",
-      "type": "image/svg+xml",
-      "form_factor": "wide",
-      "label": "Desktop view of TimeSync"
-    },
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 1136'><rect width='640' height='1136' fill='%23f7fafc'/><text x='320' y='568' text-anchor='middle' fill='%23667eea' font-size='32' font-family='Arial'>TimeSync Mobile View</text></svg>",
-      "sizes": "640x1136",
-      "type": "image/svg+xml",
-      "form_factor": "narrow",
-      "label": "Mobile view of TimeSync"
-    }
-  ],
   "shortcuts": [
     {
       "name": "New Meeting",
@@ -56,12 +40,5 @@
       ]
     }
   ],
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "protocol_handlers": [
-    {
-      "protocol": "web+timesync",
-      "url": "./index.html?tz=%s"
-    }
-  ]
+  "prefer_related_applications": false
 }
