@@ -1114,30 +1114,67 @@
     }
 
     // Initialize app
-    window.addEventListener('load', () => {
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM Content Loaded');
       initTheme();
       updateZoneDisplay();
       
       // Set default date to today
       const today = new Date().toISOString().split('T')[0];
       const dateInput = document.getElementById("input-date");
-      if (dateInput) dateInput.value = today;
+      if (dateInput) {
+        dateInput.value = today;
+        console.log('Date input set');
+      }
       
       // Set default time to current hour
       const now = new Date();
       const currentTime = now.toTimeString().slice(0, 5);
       const timeInput = document.getElementById("input-time");
-      if (timeInput) timeInput.value = currentTime;
+      if (timeInput) {
+        timeInput.value = currentTime;
+        console.log('Time input set');
+      }
       
-      // Wait a bit for all elements to be ready, then generate table
-      setTimeout(() => {
+      // Only generate table if we have all required elements
+      const durationInput = document.getElementById("time-duration");
+      if (dateInput && timeInput && durationInput) {
+        console.log('All inputs found, generating table');
         generateTable();
-      }, 100);
+      } else {
+        console.log('Missing inputs:', {
+          dateInput: !!dateInput,
+          timeInput: !!timeInput,
+          durationInput: !!durationInput
+        });
+      }
 
       // Add PWA-specific styling if installed
       if (isStandalone()) {
         document.body.classList.add('pwa-installed');
       }
+    });
+
+    // Fallback for window load
+    window.addEventListener('load', () => {
+      console.log('Window loaded');
+      // Double check initialization in case DOMContentLoaded didn't work
+      setTimeout(() => {
+        const dateInput = document.getElementById("input-date");
+        const timeInput = document.getElementById("input-time");
+        const durationInput = document.getElementById("time-duration");
+        
+        if (dateInput && timeInput && durationInput && !dateInput.value) {
+          console.log('Fallback initialization');
+          const today = new Date().toISOString().split('T')[0];
+          const now = new Date();
+          const currentTime = now.toTimeString().slice(0, 5);
+          
+          dateInput.value = today;
+          timeInput.value = currentTime;
+          generateTable();
+        }
+      }, 200);
     });
   </script>
 </body>
