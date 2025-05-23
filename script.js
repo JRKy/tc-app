@@ -43,73 +43,6 @@ function utcToZonedTime(date, timeZone) {
   return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:${second.padStart(2, '0')}`);
 }
 
-function generateTable() {
-  const dateStr = document.getElementById("input-date").value;
-  const timeStr = document.getElementById("input-time").value;
-
-  if (!dateStr || !timeStr) {
-    alert("Please select both a date and time.");
-    return;
-  }
-
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const [hour, minute] = timeStr.split(":").map(Number);
-  const startUTC = new Date(Date.UTC(year, month - 1, day, hour, minute));
-
-  const tableHead = document.querySelector("#timezone-table thead");
-  const tableBody = document.querySelector("#timezone-table tbody");
-
-  tableHead.innerHTML = "";
-  tableBody.innerHTML = "";
-
-  const headRow = document.createElement("tr");
-  headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
-    const label = new Intl.DateTimeFormat("en-US", {
-      timeZone: zone,
-      timeZoneName: "shortOffset"
-    }).formatToParts(new Date()).find(p => p.type === "timeZoneName")?.value || "";
-    return `<th>${zone} (${label.replace("GMT", "UTC")})</th>`;
-  }).join("");
-  tableHead.appendChild(headRow);
-
-  for (let i = 0; i < 48; i++) {
-    const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
-    const utcLabel = utcTime.toISOString().slice(11, 16);
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${utcLabel}</td>` + selectedZones.map(zone => {
-      const local = utcToZonedTime(utcTime, zone);
-      const localLabel = local.toTimeString().slice(0, 5);
-      return `<td>${localLabel}</td>`;
-    }).join("");
-    tableBody.appendChild(row);
-  }
-}
-
-window.onload = updateZoneDisplay;
-
-const ianaTimeZones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [];
-
-
-const zoneInput = document.getElementById("zone-input");
-zoneInput.addEventListener("input", function() {
-  const input = this.value.toLowerCase();
-  const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
-  if (suggestions.length === 1 && suggestions[0].toLowerCase() === input) return;
-  this.setAttribute("list", "tz-list");
-  let datalist = document.getElementById("tz-list");
-  if (!datalist) {
-    datalist = document.createElement("datalist");
-    datalist.id = "tz-list";
-    document.body.appendChild(datalist);
-  }
-  datalist.innerHTML = suggestions.slice(0, 10).map(z => `<option value="${z}">`).join("");
-});
-
-  const input = this.value.toLowerCase();
-  const match = ianaTimeZones.find(z => z.toLowerCase().startsWith(input));
-  if (match) this.value = match;
-});
-
 function toggleDarkMode() {
   const body = document.body;
   body.classList.toggle("dark");
@@ -119,6 +52,10 @@ function toggleDarkMode() {
 function applyTheme() {
   const saved = localStorage.getItem("theme");
   if (saved === "dark") document.body.classList.add("dark");
+}
+
+function exportPDF() {
+  window.print();
 }
 
 function generateTable() {
@@ -170,12 +107,23 @@ function generateTable() {
   }
 }
 
+const ianaTimeZones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : [];
+
+document.getElementById("zone-input").addEventListener("input", function() {
+  const input = this.value.toLowerCase();
+  const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+  if (suggestions.length === 1 && suggestions[0].toLowerCase() === input) return;
+  this.setAttribute("list", "tz-list");
+  let datalist = document.getElementById("tz-list");
+  if (!datalist) {
+    datalist = document.createElement("datalist");
+    datalist.id = "tz-list";
+    document.body.appendChild(datalist);
+  }
+  datalist.innerHTML = suggestions.slice(0, 10).map(z => `<option value="${z}">`).join("");
+});
+
 window.onload = () => {
   updateZoneDisplay();
   applyTheme();
 };
-
-// PDF export (placeholder)
-function exportPDF() {
-  window.print();
-}
