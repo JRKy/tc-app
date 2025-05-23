@@ -18,6 +18,7 @@ function addZone() {
       localStorage.setItem("zones", JSON.stringify(selectedZones));
       input.value = "";
       updateZoneDisplay();
+  generateTable(true);
     } catch (e) {
       alert("Invalid time zone");
     }
@@ -28,6 +29,7 @@ function removeZone(zone) {
   selectedZones = selectedZones.filter(z => z !== zone);
   localStorage.setItem("zones", JSON.stringify(selectedZones));
   updateZoneDisplay();
+  generateTable(true);
 }
 
 function utcToZonedTime(date, timeZone) {
@@ -58,7 +60,7 @@ function exportPDF() {
   window.print();
 }
 
-function generateTable() {
+function generateTable(autoTriggered = false) {
   const dateStr = document.getElementById("input-date").value;
   const timeStr = document.getElementById("input-time").value;
   if (!dateStr || !timeStr) return alert("Please select both a date and time.");
@@ -73,7 +75,7 @@ function generateTable() {
   tableBody.innerHTML = "";
 
   const headRow = document.createElement("tr");
-  headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
+  headRow.innerHTML = "<th><strong>UTC</strong></th>" + selectedZones.map(zone => {
     const label = new Intl.DateTimeFormat("en-US", {
       timeZone: zone,
       timeZoneName: "shortOffset"
@@ -99,6 +101,7 @@ function generateTable() {
     });
 
     if (workCount === selectedZones.length && selectedZones.length > 0) {
+      row.classList.add("smart-slot");
       row.classList.add("now-cell");
     }
 
@@ -125,5 +128,9 @@ document.getElementById("zone-input").addEventListener("input", function() {
 
 window.onload = () => {
   updateZoneDisplay();
+  generateTable(true);
   applyTheme();
 };
+
+document.getElementById("input-date").addEventListener("change", generateTable);
+document.getElementById("input-time").addEventListener("change", generateTable);

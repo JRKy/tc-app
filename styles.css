@@ -139,3 +139,10 @@ th:first-child, td:first-child {
   background-color: var(--bg);
   z-index: 1;
 }
+
+.smart-slot td {
+  background-color: #c3e6cb !important;
+  font-weight: bold;
+  border-top: 2px solid #28a745;
+  border-bottom: 2px solid #28a745;
+}
