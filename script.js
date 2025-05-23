@@ -7,7 +7,7 @@ function format(date, token) {
 }
 
 function utcToZonedTime(date, timeZone) {
-  const invdate = new Date(date.toLocaleString('en-US', { timeZone: timeZone }));
+  const invdate = new Date(date.toLocaleString('en-US', { timeZone }));
   const diff = date.getTime() - invdate.getTime();
   return new Date(date.getTime() + diff);
 }
@@ -74,23 +74,20 @@ function renderZones() {
   const now = new Date();
   const nowUTCSlot = new Date(Math.round(now.getTime() / (30 * 60 * 1000)) * 30 * 60 * 1000);
 
-  // Header
+  // Header row
   const headRow = document.createElement("tr");
-  
-    headRow.innerHTML = "<th>UTC</th>" + selectedZones.map(zone => {
-      const date = new Date();
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: zone,
-        timeZoneName: 'shortOffset'
-      });
-      const parts = formatter.formatToParts(date);
-      const offsetPart = parts.find(p => p.type === 'timeZoneName');
-      const offsetLabel = offsetPart ? offsetPart.value.replace('GMT', 'UTC') : '';
-      return `<th>${zone} (${offsetLabel}) <button onclick="removeZone('${zone}')">❌</button></th>`;
-    }).join("");
-    
-    return `<th>${zone} <button onclick="removeZone('${zone}')">❌</button></th>`;
-  }).join("");
+  headRow.innerHTML = "<th>UTC</th>";
+  selectedZones.forEach(zone => {
+    const date = new Date();
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: zone,
+      timeZoneName: "shortOffset"
+    });
+    const parts = formatter.formatToParts(date);
+    const offsetPart = parts.find(p => p.type === "timeZoneName");
+    const offsetLabel = offsetPart ? offsetPart.value.replace("GMT", "UTC") : "";
+    headRow.innerHTML += `<th>${zone} (${offsetLabel}) <button onclick="removeZone('${zone}')">❌</button></th>`;
+  });
   tableHead.appendChild(headRow);
 
   const baseDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
@@ -105,16 +102,17 @@ function renderZones() {
     }
 
     let rowHTML = `<td>${utcLabel}</td>`;
-    rowHTML += selectedZones.map(zone => {
+
+    selectedZones.forEach(zone => {
       const local = utcToZonedTime(utcTime, zone);
-      
-    const localTimeStr = format(local, "HH:mm");
-    let shiftMarker = "";
-    const utcDay = utcTime.getUTCDate();
-    const localDay = local.getUTCDate();
-    if (localDay > utcDay) shiftMarker = " +1";
-    else if (localDay < utcDay) shiftMarker = " -1";
-    
+      const localTimeStr = format(local, "HH:mm");
+
+      let shiftMarker = "";
+      const utcDay = utcTime.getUTCDate();
+      const localDay = local.getUTCDate();
+      if (localDay > utcDay) shiftMarker = " +1";
+      else if (localDay < utcDay) shiftMarker = " -1";
+
       const localHour = parseInt(format(local, "HH"), 10);
       const classes = [];
 
@@ -129,8 +127,8 @@ function renderZones() {
         classes.push("now-cell");
       }
 
-      return `<td class="${classes.join(" ")}">${localTimeStr}${shiftMarker}</td>`;
-    }).join("");
+      rowHTML += `<td class="${classes.join(" ")}">${localTimeStr}${shiftMarker}</td>`;
+    });
 
     row.innerHTML = rowHTML;
     tableBody.appendChild(row);
