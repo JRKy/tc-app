@@ -1164,16 +1164,21 @@
       populateTimezoneList();
       
       // Only generate table if we have all required elements
-      const durationInput = document.getElementById("input-duration");
       if (dateInput && timeInput && durationInput) {
-        console.log('All inputs found, generating table');
-        generateTable();
+        console.log('All inputs found, generating initial table');
+        setTimeout(() => generateTable(), 100); // Small delay to ensure everything is ready
       } else {
-        console.log('Missing inputs:', {
+        console.log('Still missing inputs after setup:', {
           dateInput: !!dateInput,
           timeInput: !!timeInput,
           durationInput: !!durationInput
         });
+        
+        // Try again with any select element
+        if (!durationInput && anySelect) {
+          console.log('Using fallback select for initial table generation');
+          setTimeout(() => generateTable(), 100);
+        }
       }
 
       // Add PWA-specific styling if installed
