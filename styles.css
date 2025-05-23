@@ -1,24 +1,195 @@
 
 body {
-  font-family: sans-serif;
-  margin: 20px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  margin: 2rem;
+  background-color: var(--bg, #f8f9fa);
+  color: var(--text, #212529);
+}
+h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.controls input, .controls button {
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+}
+button {
+  cursor: pointer;
+  background-color: var(--accent, #007bff);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+button:hover {
+  background-color: #0056b3;
+}
+button:focus {
+  outline: 2px solid #66afe9;
+}
+.material-icons {
+  font-size: 20px;
+  vertical-align: middle;
+}
+#selected-zones {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+#selected-zones span {
+  background-color: #e9ecef;
+  padding: 0.4rem 0.7rem;
+  border-radius: 20px;
+  margin: 0 0.3rem;
+  display: inline-block;
+}
+#selected-zones button {
+  background: none;
+  border: none;
+  color: red;
+  font-weight: bold;
+  margin-left: 5px;
+  cursor: pointer;
 }
 table {
-  border-collapse: collapse;
   width: 100%;
-  margin-top: 20px;
+  border-collapse: collapse;
+  text-align: center;
+  table-layout: fixed;
+}
+thead {
+  background-color: #343a40;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 th, td {
-  border: 1px solid #aaa;
-  padding: 6px;
+  padding: 0.6rem;
+  border: 1px solid #dee2e6;
+  word-wrap: break-word;
+}
+tbody tr:nth-child(even) {
+  background-color: #f1f3f5;
+}
+.legend {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.legend-item {
+  margin: 0 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.legend-item.work { background-color: #d4edda; }
+.legend-item.sleep { background-color: #dee2e6; }
+.legend-item.off   { background-color: #fef9e7; }
+.legend-item.smart { background-color: #c3e6cb; }
+.smart-slot td {
+  background-color: #c3e6cb !important;
+  font-weight: bold;
+  border-top: 2px solid #28a745;
+  border-bottom: 2px solid #28a745;
+}
+td.work { background-color: #d4edda; }
+td.sleep { background-color: #dee2e6; }
+td.off   { background-color: #fef9e7; }
+td.now-cell { background-color: #ffeeba; font-weight: bold; }
+th.utc-header {
+  background-color: #343a40;
+  color: white;
+  font-weight: bold;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.toolbar button {
+  background-color: #ffffff;
+  color: #007bff;
+  border: 2px solid #007bff;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+.toolbar button:hover {
+  background-color: #007bff;
+  color: #ffffff;
+}
+label.add-utc {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+}
+
+
+/* Dark mode toggle */
+[data-theme='dark'] {
+  --bg: #121212;
+  --text: #f1f1f1;
+  --accent: #1e88e5;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+th, td {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
   text-align: center;
 }
-.work {
-  background-color: #c2f0c2;
+thead th {
+  background-color: var(--accent);
+  color: white;
 }
-.sleep {
-  background-color: #f0e68c;
+tbody td small {
+  display: block;
+  font-size: 0.7rem;
+  color: #666;
 }
-.off {
-  background-color: #f8f8f8;
+td.work { background-color: #d4edda; }
+td.sleep { background-color: #ffeeba; }
+td.off { background-color: #f8f9fa; }
+td.now { border: 2px solid #007bff; }
+
+.legend {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
 }
+.legend span {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  background: #eee;
+  font-size: 0.85rem;
+}
+.legend .work { background: #c2f0c2; }
+.legend .sleep { background: #fce5cd; }
+.legend .off { background: #eee; }
+.legend .all { background: #ffe58f; }
+
