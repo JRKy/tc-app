@@ -74,7 +74,7 @@ function renderZones() {
   const now = new Date();
   const nowUTCSlot = new Date(Math.round(now.getTime() / (30 * 60 * 1000)) * 30 * 60 * 1000);
 
-  // Header row
+  // Header
   const headRow = document.createElement("tr");
   headRow.innerHTML = "<th>UTC</th>";
   selectedZones.forEach(zone => {
@@ -90,10 +90,10 @@ function renderZones() {
   });
   tableHead.appendChild(headRow);
 
-  const baseDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+  const baseUTC = Date.UTC(2025, 4, 23, 0, 0, 0, 0);
 
   for (let i = 0; i < 48; i++) {
-    const utcTime = new Date(baseDate.getTime() + i * 30 * 60 * 1000);
+    const utcTime = new Date(baseUTC + i * 30 * 60 * 1000);
     const utcLabel = format(utcTime, "HH:mm");
     const row = document.createElement("tr");
 
