@@ -232,3 +232,18 @@ window.onload = () => {
     tableBody.appendChild(row);
   }
 }  // END generateTable
+
+
+
+document.getElementById("zone-input").addEventListener("input", function() {
+  const input = this.value.toLowerCase();
+  const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+  this.setAttribute("list", "tz-list");
+  let datalist = document.getElementById("tz-list");
+  if (!datalist) {
+    datalist = document.createElement("datalist");
+    datalist.id = "tz-list";
+    document.body.appendChild(datalist);
+  }
+  datalist.innerHTML = suggestions.slice(0, 20).map(z => `<option value="${z}">`).join("");
+});
