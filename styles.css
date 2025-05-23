@@ -134,7 +134,7 @@ button.toggle-mode {
   font-weight: bold;
 }
 th:first-child, td:first-child {
-  position: sticky;
+  /* position: sticky; */
   left: 0;
   background-color: var(--bg);
   z-index: 1;

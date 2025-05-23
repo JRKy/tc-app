@@ -99,16 +99,19 @@ function generateTable(autoTriggered = false) {
     let cells = [`<td>${utcLabel}</td>`];
     let workCount = 0;
 
+    
+    const smartZones = [];
     selectedZones.forEach(zone => {
+
       const local = utcToZonedTime(utcTime, zone);
       const h = local.getHours();
       const label = local.toTimeString().slice(0, 5);
       const cls = (h >= 8 && h < 17) ? "work" : (h < 6 || h >= 22) ? "sleep" : "off";
-      if (cls === "work") workCount++;
+      if (cls === "work") { workCount++; smartZones.push(zone); }
       cells.push(`<td class="${cls}">${label}</td>`);
     });
 
-    if (workCount === selectedZones.length && selectedZones.length > 0) {
+    if (smartZones.length === selectedZones.length && selectedZones.length > 0) {
       row.classList.add("smart-slot");
       row.classList.add("now-cell");
     }
