@@ -193,16 +193,10 @@ function generateTable(autoTriggered = false) {
     
     const jan = new Date(now.getFullYear(), 0, 1);
     const jul = new Date(now.getFullYear(), 6, 1);
-    let utcRowOffset = Math.max(
-      jan.getTimezoneOffset(),
-      jul.getTimezoneOffset()
-    );
-    
-    let utcRowOffset = Math.max(
+    const isDST = utcTime.getTimezoneOffset() < Math.max(
       new Date(utcTime.getFullYear(), 0, 1).getTimezoneOffset(),
       new Date(utcTime.getFullYear(), 6, 1).getTimezoneOffset()
     );
-    const isDST = utcTime.getTimezoneOffset() < utcRowOffset;
     
     
     return `<th>${zone} (${offset}${isDST ? "*" : ""})</th>`;
