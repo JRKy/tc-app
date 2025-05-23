@@ -837,20 +837,18 @@ function generateTable() {
     return;
   }
   
-  // CREATE EVENT TIME - this is the key fix!
+  // CREATE EVENT TIME
   const [year, month, day] = dateStr.split("-").map(Number);
   const [hours, minutes] = timeStr.split(":").map(Number);
-  
+
   let eventTimeUTC;
   if (validEventTimezone === 'UTC') {
     eventTimeUTC = new Date(Date.UTC(year, month - 1, day, hours, minutes));
   } else {
-    // Simple approach: create date in event timezone
-    const eventDate = new Date(year, month - 1, day, hours, minutes);
-    const utcDate = new Date(eventDate.toLocaleString('en-US', { timeZone: 'UTC' }));
-    const tzDate = new Date(eventDate.toLocaleString('en-US', { timeZone: validEventTimezone }));
-    const offset = utcDate.getTime() - tzDate.getTime();
-    eventTimeUTC = new Date(eventDate.getTime() + offset);
+    // Create the date string in the event timezone
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+    // Convert to UTC using the event timezone
+    eventTimeUTC = new Date(new Date(dateStr).toLocaleString('en-US', { timeZone: validEventTimezone }));
   }
 
   console.log('🕐 Event time UTC:', eventTimeUTC.toISOString());
@@ -1003,7 +1001,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   if (eventTimezoneInput) {
-    eventTimezoneInput.value = userTimezone;
+    eventTimezoneInput.value = "";
+    eventTimezoneInput.placeholder = "Select event timezone (e.g., " + userTimezone + ")";
     eventTimezoneInput.addEventListener("change", () => {
       console.log('🌍 Event timezone changed to:', eventTimezoneInput.value);
       generateTable();
