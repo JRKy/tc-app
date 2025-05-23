@@ -1008,6 +1008,7 @@
       console.log('=== CHECKING DOM ELEMENTS ===');
       console.log('Date input:', !!document.getElementById("input-date"));
       console.log('Time input:', !!document.getElementById("input-time"));  
+      console.log('Event timezone input:', !!document.getElementById("event-timezone"));
       console.log('Duration input:', !!document.getElementById("input-duration"));
       console.log('Zone input:', !!document.getElementById("zone-input"));
       console.log('Table:', !!document.getElementById("timezone-table"));
@@ -1042,6 +1043,30 @@
         console.log('ERROR: No duration input found!');
       }
       
+      const eventTimezoneInput = document.getElementById("event-timezone");
+      if (eventTimezoneInput) {
+        // Default to user's timezone
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        eventTimezoneInput.value = userTimezone;
+        eventTimezoneInput.addEventListener("change", function() {
+          console.log('Event timezone changed to:', this.value);
+          generateTable();
+        });
+        eventTimezoneInput.addEventListener("input", function() {
+          console.log('Event timezone input:', this.value);
+          const input = this.value.toLowerCase();
+          const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+          
+          let datalist = document.getElementById("event-tz-list");
+          if (datalist) {
+            datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}"></option>`).join("");
+          }
+        });
+        console.log('Event timezone set to user timezone:', userTimezone);
+      } else {
+        console.log('ERROR: Event timezone input not found!');
+      }
+      
       const zoneInput = document.getElementById("zone-input");
       if (zoneInput) {
         zoneInput.addEventListener("keypress", function(e) {
@@ -1071,7 +1096,7 @@
       setTimeout(() => {
         console.log('Attempting initial table generation...');
         generateTable();
-      }, 200);
+      }, 300); // Increased timeout to ensure all elements are ready
 
       if (isStandalone()) {
         document.body.classList.add('pwa-installed');
