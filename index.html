@@ -1026,7 +1026,7 @@
     // Event listeners
     const dateInput = document.getElementById("input-date");
     const timeInput = document.getElementById("input-time");
-    const durationInput = document.getElementById("time-duration");
+    const durationInput = document.getElementById("input-duration");
     const zoneInput = document.getElementById("zone-input");
 
     if (dateInput) dateInput.addEventListener("change", generateTable);
@@ -1136,8 +1136,8 @@
         console.log('Time input set');
       }
       
-      // Only generate table if we have all required elements
-      const durationInput = document.getElementById("time-duration");
+              // Only generate table if we have all required elements
+      const durationInput = document.getElementById("input-duration");
       if (dateInput && timeInput && durationInput) {
         console.log('All inputs found, generating table');
         generateTable();
