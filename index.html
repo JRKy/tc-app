@@ -1010,23 +1010,35 @@
       'Australia/Sydney', 'Pacific/Auckland'
     ];
 
-    document.getElementById("zone-input").addEventListener("input", function() {
-      const input = this.value.toLowerCase();
-      const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
-      
-      let datalist = document.getElementById("tz-list");
-      datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}">`).join("");
-    });
+    const zoneInputElement = document.getElementById("zone-input");
+    if (zoneInputElement) {
+      zoneInputElement.addEventListener("input", function() {
+        const input = this.value.toLowerCase();
+        const suggestions = ianaTimeZones.filter(z => z.toLowerCase().includes(input));
+        
+        let datalist = document.getElementById("tz-list");
+        if (datalist) {
+          datalist.innerHTML = suggestions.slice(0, 15).map(z => `<option value="${z}">`).join("");
+        }
+      });
+    }
 
     // Event listeners
-    document.getElementById("input-date").addEventListener("change", generateTable);
-    document.getElementById("input-time").addEventListener("change", generateTable);
-    document.getElementById("time-duration").addEventListener("change", generateTable);
-    document.getElementById("zone-input").addEventListener("keypress", function(e) {
-      if (e.key === 'Enter') {
-        addZone();
-      }
-    });
+    const dateInput = document.getElementById("input-date");
+    const timeInput = document.getElementById("input-time");
+    const durationInput = document.getElementById("time-duration");
+    const zoneInput = document.getElementById("zone-input");
+
+    if (dateInput) dateInput.addEventListener("change", generateTable);
+    if (timeInput) timeInput.addEventListener("change", generateTable);
+    if (durationInput) durationInput.addEventListener("change", generateTable);
+    if (zoneInput) {
+      zoneInput.addEventListener("keypress", function(e) {
+        if (e.key === 'Enter') {
+          addZone();
+        }
+      });
+    }
 
     // Service Worker Registration
     if ('serviceWorker' in navigator) {
