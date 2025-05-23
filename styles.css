@@ -115,3 +115,30 @@ th.utc-header {
   color: white;
   font-weight: bold;
 }
+
+.toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.toolbar button {
+  background-color: #ffffff;
+  color: #007bff;
+  border: 2px solid #007bff;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+.toolbar button:hover {
+  background-color: #007bff;
+  color: #ffffff;
+}
+label.add-utc {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+}

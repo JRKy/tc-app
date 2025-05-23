@@ -92,15 +92,20 @@ function generateTable(autoTriggered = false) {
   }).join("");
   tableHead.appendChild(headRow);
 
+  
+  const showUTC = document.getElementById("include-utc")?.checked;
   for (let i = 0; i < 48; i++) {
+
     const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
     const utcLabel = utcTime.toISOString().slice(11, 16);
     const row = document.createElement("tr");
     let cells = [`<td>${utcLabel}</td>`];
     
     let utcHour = utcTime.getUTCHours();
-    const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
-    if (utcClass === "work") smartZones.push("__utc__");
+    
+    let utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
+    if (showUTC && utcClass === "work") smartZones.push("__utc__");
+
     let workCount = 0;
 
     
@@ -171,7 +176,10 @@ function generateTable(autoTriggered = false) {
   tableBody.innerHTML = "";
 
   const headRow = document.createElement("tr");
-  headRow.innerHTML = '<th class="utc-header">UTC</th>' + selectedZones.map(zone => {
+  
+  headRow.innerHTML = (showUTC ? '<th class="utc-header">UTC</th>' : "") +
+    selectedZones.map(zone => {
+
     const now = new Date();
     const formatter = new Intl.DateTimeFormat("en-US", {
       timeZone: zone,
@@ -184,7 +192,10 @@ function generateTable(autoTriggered = false) {
   }).join("");
   tableHead.appendChild(headRow);
 
+  
+  const showUTC = document.getElementById("include-utc")?.checked;
   for (let i = 0; i < 48; i++) {
+
     const utcTime = new Date(startUTC.getTime() + i * 30 * 60 * 1000);
     const utcHour = utcTime.getUTCHours();
     const utcLabel = utcTime.toISOString().slice(11, 16);
@@ -192,9 +203,13 @@ function generateTable(autoTriggered = false) {
 
     let row = document.createElement("tr");
     let smartZones = [];
-    const utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
-    if (utcClass === "work") smartZones.push("__utc__");
-    row.innerHTML = `<td class="${utcClass}">${utcLabel}<br/><small>${utcDay}</small></td>`;
+    
+    let utcClass = (utcHour >= 8 && utcHour < 17) ? "work" : (utcHour < 6 || utcHour >= 22) ? "sleep" : "off";
+    if (showUTC && utcClass === "work") smartZones.push("__utc__");
+
+    
+    row.innerHTML = showUTC ? `<td class="${utcClass}">${utcLabel}<br/><small>${utcDay}</small></td>` : "";
+
 
     selectedZones.forEach(zone => {
       const local = utcToZonedTime(utcTime, zone);
