@@ -83,38 +83,11 @@ class UI {
     }
 
     // Add to Calendar Buttons
-    function getEventDetails() {
-      const date = document.getElementById('input-date')?.value;
-      const time = document.getElementById('input-time')?.value;
-      const duration = parseInt(document.getElementById('input-duration')?.value || '1');
-      const eventTimezone = document.getElementById('event-timezone')?.value;
-      const title = 'TimeSync Event';
-      const description = 'Scheduled via TimeSync\n\n' + document.getElementById('timezone-table').outerHTML;
-      if (!date || !time || !eventTimezone) return null;
-      // Start time in ISO format
-      const start = new Date(`${date}T${time}:00`);
-      // End time
-      const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
-      // Format as YYYYMMDDTHHmmssZ (UTC)
-      function formatICSDate(d) {
-        return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-      }
-      return {
-        title,
-        description,
-        start,
-        end,
-        startStr: formatICSDate(start),
-        endStr: formatICSDate(end),
-        timezone: eventTimezone
-      };
-    }
-
     const googleBtn = document.getElementById('add-google-calendar');
     if (googleBtn) {
       googleBtn.addEventListener('click', () => {
-        const event = getEventDetails();
-        if (!event) return alert('Please fill out all event details.');
+        const event = this.getEventDetails();
+        if (!event) return this.showError('Please fill out all event details.');
         const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.startStr}/${event.endStr}&details=${encodeURIComponent(event.description)}`;
         window.open(url, '_blank');
       });
@@ -123,34 +96,19 @@ class UI {
     const outlookBtn = document.getElementById('add-outlook-calendar');
     if (outlookBtn) {
       outlookBtn.addEventListener('click', () => {
-        const event = getEventDetails();
-        if (!event) return alert('Please fill out all event details.');
+        const event = this.getEventDetails();
+        if (!event) return this.showError('Please fill out all event details.');
         const url = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&body=${encodeURIComponent(event.description)}&startdt=${event.start.toISOString()}&enddt=${event.end.toISOString()}`;
         window.open(url, '_blank');
       });
     }
 
-    function getPlainTextTable() {
-      const table = document.getElementById('timezone-table');
-      if (!table || table.style.display === 'none') return '';
-      let text = '';
-      // Headers
-      const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
-      text += headers.join('\t') + '\n';
-      // Rows
-      Array.from(table.querySelectorAll('tbody tr')).forEach(row => {
-        const cells = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim().replace(/\n/g, ' '));
-        text += cells.join('\t') + '\n';
-      });
-      return text;
-    }
-
     const appleBtn = document.getElementById('add-apple-calendar');
     if (appleBtn) {
       appleBtn.addEventListener('click', () => {
-        const event = getEventDetails();
-        if (!event) return alert('Please fill out all event details.');
-        const plainTable = getPlainTextTable();
+        const event = this.getEventDetails();
+        if (!event) return this.showError('Please fill out all event details.');
+        const plainTable = this.getPlainTextTable();
         const description = 'Scheduled via TimeSync';
         const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${event.title}\nDESCRIPTION:${description.replace(/\n/g, '\\n')}\\n\\n${plainTable.replace(/\n/g, '\\n')}\nDTSTART:${event.startStr}\nDTEND:${event.endStr}\nEND:VEVENT\nEND:VCALENDAR`;
         const blob = new Blob([ics], { type: 'text/calendar' });
@@ -162,6 +120,117 @@ class UI {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+      });
+    }
+
+    // Keyboard shortcut help modal
+    const shortcutHelpModal = document.getElementById('shortcut-help-modal');
+    const shortcutHelpClose = document.getElementById('shortcut-help-close');
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === '/') {
+        e.preventDefault();
+        if (shortcutHelpModal) shortcutHelpModal.style.display = 'flex';
+      }
+      if (e.key === 'Escape' && shortcutHelpModal && shortcutHelpModal.style.display === 'flex') {
+        shortcutHelpModal.style.display = 'none';
+      }
+    });
+    if (shortcutHelpClose && shortcutHelpModal) {
+      shortcutHelpClose.addEventListener('click', () => {
+        shortcutHelpModal.style.display = 'none';
+      });
+    }
+
+    // Help icon button for keyboard shortcuts
+    const shortcutHelpBtn = document.getElementById('shortcut-help-btn');
+    if (shortcutHelpBtn && shortcutHelpModal) {
+      shortcutHelpBtn.addEventListener('click', () => {
+        shortcutHelpModal.style.display = 'flex';
+        setTimeout(() => {
+          const el = shortcutHelpModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (el) el.focus();
+        }, 0);
+      });
+    }
+
+    // Focus trap for modals
+    function trapFocus(modal) {
+      const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+      const focusableEls = modal.querySelectorAll(focusableSelectors);
+      if (!focusableEls.length) return;
+      const firstEl = focusableEls[0];
+      const lastEl = focusableEls[focusableEls.length - 1];
+      function handleTrap(e) {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey) {
+          if (document.activeElement === firstEl) {
+            e.preventDefault();
+            lastEl.focus();
+          }
+        } else {
+          if (document.activeElement === lastEl) {
+            e.preventDefault();
+            firstEl.focus();
+          }
+        }
+      }
+      modal.addEventListener('keydown', handleTrap);
+      // Remove event on close
+      function cleanup() { modal.removeEventListener('keydown', handleTrap); }
+      return cleanup;
+    }
+    let copyModalCleanup = null;
+    let shortcutModalCleanup = null;
+    if (copyModal && copyModalClose) {
+      copyModal.addEventListener('transitionend', () => {
+        if (copyModal.style.display === 'flex') {
+          copyModalCleanup = trapFocus(copyModal);
+          // Focus first focusable element
+          setTimeout(() => {
+            const el = copyModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (el) el.focus();
+          }, 0);
+        } else if (copyModalCleanup) {
+          copyModalCleanup();
+        }
+      });
+    }
+    if (shortcutHelpModal && shortcutHelpClose) {
+      shortcutHelpModal.addEventListener('transitionend', () => {
+        if (shortcutHelpModal.style.display === 'flex') {
+          shortcutModalCleanup = trapFocus(shortcutHelpModal);
+          setTimeout(() => {
+            const el = shortcutHelpModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (el) el.focus();
+          }, 0);
+        } else if (shortcutModalCleanup) {
+          shortcutModalCleanup();
+        }
+      });
+    }
+    // Also trigger focus trap on open (for non-animated modals)
+    if (copyTableBtn) {
+      copyTableBtn.addEventListener('click', () => {
+        if (copyModal && copyModal.style.display === 'flex') {
+          copyModalCleanup = trapFocus(copyModal);
+          setTimeout(() => {
+            const el = copyModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (el) el.focus();
+          }, 0);
+        }
+      });
+    }
+    if (shortcutHelpModal) {
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === '/') {
+          setTimeout(() => {
+            if (shortcutHelpModal.style.display === 'flex') {
+              shortcutModalCleanup = trapFocus(shortcutHelpModal);
+              const el = shortcutHelpModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+              if (el) el.focus();
+            }
+          }, 0);
+        }
       });
     }
   }
@@ -219,7 +288,7 @@ class UI {
     
     const zones = storage.getZones();
     if (zones.includes(zone)) {
-      console.log(`⚠️ ${zone} is already added`);
+      this.showError(`⚠️ ${zone} is already added`);
       input.value = "";
       input.focus();
       return;
@@ -259,7 +328,6 @@ class UI {
       this.updateZoneDisplay();
       table.generate();
     } else {
-      console.log(`Failed to validate any variation of: ${zone}`);
       this.showError(`Invalid time zone: "${zone}". Try selecting from dropdown suggestions.`);
       input.focus();
       input.select();
@@ -282,8 +350,8 @@ class UI {
     container.innerHTML = zones.map(zone => `
       <div class="zone-chip">
         <span>${timezoneUtils.getTimezoneDisplayName(zone)}</span>
-        <button class="remove-btn" data-zone="${zone}" aria-label="Remove ${zone}">
-          ✕
+        <button class="remove-btn btn btn-icon" data-zone="${zone}" aria-label="Remove ${zone}">
+          <span class="material-icons">close</span>
         </button>
       </div>
     `).join('');
@@ -407,6 +475,52 @@ class UI {
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
     };
+  }
+
+  getEventDetails() {
+    const date = document.getElementById('input-date')?.value;
+    const time = document.getElementById('input-time')?.value;
+    const duration = parseInt(document.getElementById('input-duration')?.value || CONFIG.defaultDuration);
+    const eventTimezone = document.getElementById('event-timezone')?.value;
+    const title = 'TimeSync Event';
+    const description = 'Scheduled via TimeSync\n\n' + document.getElementById('timezone-table').outerHTML;
+    if (!date || !time || !eventTimezone) return null;
+    const start = new Date(`${date}T${time}:00`);
+    const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
+    function formatICSDate(d) {
+      return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    }
+    return {
+      title,
+      description,
+      start,
+      end,
+      startStr: formatICSDate(start),
+      endStr: formatICSDate(end),
+      timezone: eventTimezone
+    };
+  }
+
+  getPlainTextTable() {
+    const table = document.getElementById('timezone-table');
+    if (!table || table.style.display === 'none') return '';
+    let text = '';
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+    text += headers.join('\t') + '\n';
+    Array.from(table.querySelectorAll('tbody tr')).forEach(row => {
+      const cells = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim().replace(/\n/g, ' '));
+      text += cells.join('\t') + '\n';
+    });
+    return text;
+  }
+
+  showSuccess(message) {
+    if (!this.errorContainer) return;
+    this.errorContainer.textContent = message;
+    this.errorContainer.classList.add('show', 'success');
+    setTimeout(() => {
+      this.errorContainer.classList.remove('show', 'success');
+    }, CONFIG.errorMessageDuration);
   }
 }
 

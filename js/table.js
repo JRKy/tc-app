@@ -20,8 +20,6 @@ class Table {
   }
 
   generate() {
-    console.log('🚀 NEW generateTable called');
-    
     const dateInput = document.getElementById('input-date');
     const timeInput = document.getElementById('input-time');
     const eventTimezoneInput = document.getElementById('event-timezone');
@@ -29,7 +27,6 @@ class Table {
     
     // Show empty state if any required field is missing
     if (!dateInput?.value || !timeInput?.value || !eventTimezoneInput?.value || !durationInput?.value) {
-      console.log('❌ Missing required fields - showing empty state');
       this.showEmptyState();
       return;
     }
@@ -41,7 +38,6 @@ class Table {
 
     // Validate event timezone
     if (!timezoneUtils.isValidTimezone(eventTimezone)) {
-      console.error('❌ Invalid event timezone:', eventTimezone);
       this.showEmptyState();
       return;
     }
@@ -65,7 +61,6 @@ class Table {
 
   validateInputs(dateInput, timeInput, eventTimezoneInput, durationInput) {
     if (!dateInput || !timeInput || !eventTimezoneInput || !durationInput || !this.table || !this.emptyState) {
-      console.error('Required elements not found. Please refresh the page.');
       return false;
     }
 

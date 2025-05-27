@@ -12,7 +12,7 @@
   <style>
     :root {
       --primary: #667eea;
-      --primary-dark: #5a67d8;
+      --primary-dark: #4c51bf;
       --secondary: #764ba2;
       --accent: #f093fb;
       --success: #48bb78;
@@ -20,30 +20,30 @@
       --danger: #f56565;
       --info: #4299e1;
       
-      --bg-primary: #ffffff;
-      --bg-secondary: #f7fafc;
+      --bg-primary: #f7fafc;
+      --bg-secondary: #ffffff;
       --bg-card: #ffffff;
       --text-primary: #2d3748;
-      --text-secondary: #718096;
+      --text-secondary: #4a5568;
       --text-muted: #a0aec0;
       --border: #e2e8f0;
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow: 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
       --radius: 12px;
-      --radius-lg: 16px;
+      --radius-lg: 18px;
       --table-header-gradient: linear-gradient(135deg, var(--primary), var(--secondary));
       --table-header-icon-bg: rgba(102,126,234,0.12);
       --table-radius: 14px;
     }
 
     [data-theme='dark'] {
-      --bg-primary: #1a202c;
-      --bg-secondary: #2d3748;
-      --bg-card: #2d3748;
+      --bg-primary: #232946;
+      --bg-secondary: #16161a;
+      --bg-card: #232946;
       --text-primary: #f7fafc;
-      --text-secondary: #e2e8f0;
-      --text-muted: #a0aec0;
-      --border: #4a5568;
+      --text-secondary: #a0aec0;
+      --text-muted: #718096;
+      --border: #2d3748;
     }
 
     * {
@@ -53,37 +53,64 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
       background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
       min-height: 100vh;
       color: var(--text-primary);
-      transition: all 0.3s ease;
+      transition: background 0.3s, color 0.3s;
     }
 
     .app-container {
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 1rem;
+      padding: 1.5rem;
       min-height: 100vh;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 2rem;
-      color: white;
+      margin-bottom: 2.5rem;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 2rem 1rem 1.5rem 1rem;
+      position: relative;
+      color: var(--primary);
+    }
+
+    .branding {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      background: none;
+      border-radius: var(--radius);
+      padding: 0.5rem 1.5rem;
+      box-shadow: none;
+    }
+
+    .header .app-logo {
+      font-size: 3.2rem;
+      color: var(--primary);
+      text-shadow: none;
     }
 
     .header h1 {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin: 0;
+      color: var(--primary-dark);
+      letter-spacing: -1px;
+      background: none;
+      text-shadow: none;
     }
 
-    .header p {
-      font-size: 1.1rem;
-      opacity: 0.9;
-      font-weight: 300;
+    .header .subtitle {
+      font-size: 1.15rem;
+      margin-top: 0.7rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+      text-shadow: none;
     }
 
     .main-card {
@@ -665,6 +692,57 @@
       -webkit-font-feature-settings: 'liga';
       -webkit-font-smoothing: antialiased;
     }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.4);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #fff;
+      color: #222;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      padding: 2rem;
+      max-width: 600px;
+      width: 90vw;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    @media (max-width: 500px) {
+      .modal-content {
+        padding: 1rem;
+        max-width: 95vw;
+      }
+    }
+    .modal-header {
+      margin-top: 0;
+    }
+    .modal-footer {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+    .modal-textarea {
+      width: 100%;
+      height: 200px;
+      font-family: monospace;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+    }
+    .modal-content--narrow {
+      max-width: 400px;
+    }
   </style>
 </head>
 <body>
@@ -673,11 +751,11 @@
   <div class="icon" aria-hidden="true" style="text-align:center;"><span class="material-icons" style="font-size: 4rem;">star</span></div>
   <div class="app-container">
     <header class="header" role="banner">
-      <div class="branding" style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
-        <span class="material-icons app-logo" style="font-size: 3rem; color: var(--primary);">public</span>
-        <h1 style="margin: 0;">TimeSync</h1>
+      <div class="branding">
+        <span class="material-icons app-logo">public</span>
+        <h1>TimeSync</h1>
       </div>
-      <p class="subtitle" style="text-align: center; margin-top: 0.5rem; color: var(--text-secondary);">Plan events across time zones with confidence</p>
+      <p class="subtitle">Plan events across time zones with confidence</p>
     </header>
 
     <main id="main-content" class="main-card" role="main">
@@ -693,6 +771,9 @@
         </button>
         <button class="btn btn-icon" id="theme-toggle" aria-label="Toggle dark mode" role="switch" aria-checked="false" title="Toggle dark mode">
           <span class="material-icons" id="theme-icon">dark_mode</span>
+        </button>
+        <button class="btn btn-icon" id="shortcut-help-btn" aria-label="Show keyboard shortcuts" title="Show keyboard shortcuts">
+          <span class="material-icons">help_outline</span>
         </button>
       </div>
 
@@ -759,13 +840,13 @@
         </table>
         <div id="calendar-buttons" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
           <button class="btn btn-icon" id="add-google-calendar" aria-label="Add to Google Calendar" title="Add to Google Calendar">
-            <span class="material-icons">event</span> Google
+            <span class="material-icons">event</span>
           </button>
           <button class="btn btn-icon" id="add-outlook-calendar" aria-label="Add to Outlook Calendar" title="Add to Outlook Calendar">
-            <span class="material-icons">event_available</span> Outlook
+            <span class="material-icons">event_available</span>
           </button>
           <button class="btn btn-icon" id="add-apple-calendar" aria-label="Add to Apple Calendar" title="Add to Apple Calendar">
-            <span class="material-icons">event_note</span> Apple
+            <span class="material-icons">event_note</span>
           </button>
         </div>
       </div>
@@ -777,13 +858,28 @@
 
   <div id="error-container" class="error-message" role="alert" aria-live="polite"></div>
 
-  <div id="copy-modal" class="modal" style="display:none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); z-index: 9999; align-items: center; justify-content: center;">
-    <div class="modal-content" style="background: #fff; color: #222; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); padding: 2rem; max-width: 600px; width: 90vw; display: flex; flex-direction: column; gap: 1rem;">
-      <h2 style="margin-top:0;">Copy Table as Plain Text</h2>
-      <textarea id="copy-modal-text" style="width:100%; height: 200px; font-family: monospace; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; padding: 0.5rem;" readonly></textarea>
-      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+  <div id="copy-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="copy-modal-header">
+    <div class="modal-content">
+      <h2 class="modal-header" id="copy-modal-header"><span class="material-icons" style="vertical-align: middle; font-size: 1.2em; margin-right: 0.5em;">content_copy</span>Copy Table as Plain Text</h2>
+      <textarea id="copy-modal-text" class="modal-textarea" readonly></textarea>
+      <div class="modal-footer">
         <button class="btn btn-secondary" id="copy-modal-close" aria-label="Close modal"><span class="material-icons">close</span> Close</button>
         <button class="btn btn-primary" id="copy-modal-copy" aria-label="Copy to clipboard"><span class="material-icons">content_copy</span> Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="shortcut-help-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="shortcut-help-header">
+    <div class="modal-content modal-content--narrow">
+      <h2 class="modal-header" id="shortcut-help-header"><span class="material-icons" style="vertical-align: middle; font-size: 1.2em; margin-right: 0.5em;">help_outline</span>Keyboard Shortcuts</h2>
+      <ul style="list-style: none; padding: 0;">
+        <li><b>Export PDF:</b> <kbd>Ctrl/Cmd + E</kbd></li>
+        <li><b>Share:</b> <kbd>Ctrl/Cmd + S</kbd></li>
+        <li><b>Toggle Dark Mode:</b> <kbd>Ctrl/Cmd + D</kbd></li>
+        <li><b>Save Schedule:</b> <kbd>Ctrl/Cmd + S</kbd></li>
+      </ul>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="shortcut-help-close" aria-label="Close modal"><span class="material-icons">close</span> Close</button>
       </div>
     </div>
   </div>
