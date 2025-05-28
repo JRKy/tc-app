@@ -6,7 +6,6 @@ A modern, accessible time zone event planner web app.
 - Modern, clean UI with Google Material Icons
 - Add and remove time zones with smart validation
 - Table view with work, sleep, and off-hour highlighting
-- Export as plain text or add to Google, Outlook, or Apple Calendar
 - Light/dark theme toggle
 - Fully offline-ready (PWA)
 

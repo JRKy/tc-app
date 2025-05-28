@@ -82,47 +82,6 @@ class UI {
       });
     }
 
-    // Add to Calendar Buttons
-    const googleBtn = document.getElementById('add-google-calendar');
-    if (googleBtn) {
-      googleBtn.addEventListener('click', () => {
-        const event = this.getEventDetails();
-        if (!event) return this.showError('Please fill out all event details.');
-        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.startStr}/${event.endStr}&details=${encodeURIComponent(event.description)}`;
-        window.open(url, '_blank');
-      });
-    }
-
-    const outlookBtn = document.getElementById('add-outlook-calendar');
-    if (outlookBtn) {
-      outlookBtn.addEventListener('click', () => {
-        const event = this.getEventDetails();
-        if (!event) return this.showError('Please fill out all event details.');
-        const url = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&body=${encodeURIComponent(event.description)}&startdt=${event.start.toISOString()}&enddt=${event.end.toISOString()}`;
-        window.open(url, '_blank');
-      });
-    }
-
-    const appleBtn = document.getElementById('add-apple-calendar');
-    if (appleBtn) {
-      appleBtn.addEventListener('click', () => {
-        const event = this.getEventDetails();
-        if (!event) return this.showError('Please fill out all event details.');
-        const plainTable = this.getPlainTextTable();
-        const description = 'Scheduled via TimeSync';
-        const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${event.title}\nDESCRIPTION:${description.replace(/\n/g, '\\n')}\\n\\n${plainTable.replace(/\n/g, '\\n')}\nDTSTART:${event.startStr}\nDTEND:${event.endStr}\nEND:VEVENT\nEND:VCALENDAR`;
-        const blob = new Blob([ics], { type: 'text/calendar' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'event.ics';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      });
-    }
-
     // Keyboard shortcut help modal
     const shortcutHelpModal = document.getElementById('shortcut-help-modal');
     const shortcutHelpClose = document.getElementById('shortcut-help-close');
