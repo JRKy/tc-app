@@ -2,75 +2,170 @@ import CONFIG from './config.js';
 import storage from './storage.js';
 import timezoneUtils from './timezone.js';
 import table from './table.js';
+import Modal from './modal.js';
 
 class UI {
   constructor() {
     this.errorContainer = document.getElementById('error-container');
+    this.isPrinting = false;
+    this.printTimeout = null;
+    this.hasSelectedTimezone = false;
+    this.initializeModals();
     this.initializeEventListeners();
   }
 
+  initializeModals() {
+    const copyModal = document.getElementById('copy-modal');
+    const shortcutHelpModal = document.getElementById('shortcut-help-modal');
+
+    if (copyModal) {
+      this.copyModal = new Modal(copyModal, {
+        onOpen: () => {
+          const textArea = copyModal.querySelector('textarea');
+          if (textArea) textArea.focus();
+        }
+      });
+    }
+
+    if (shortcutHelpModal) {
+      this.shortcutHelpModal = new Modal(shortcutHelpModal);
+    }
+  }
+
   initializeEventListeners() {
-    // Keyboard shortcuts
+    this.initializeKeyboardShortcuts();
+    this.initializeThemeToggle();
+    this.initializeExportButton();
+    this.initializeShareButton();
+    this.initializeAddZoneButton();
+    this.initializeInputFields();
+    this.initializeCopyTable();
+    this.initializeShortcutHelp();
+  }
+
+  initializeKeyboardShortcuts() {
     document.addEventListener('keydown', this.handleKeyboardShortcuts.bind(this));
-    
-    // Theme toggle
+  }
+
+  initializeThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
       themeToggle.addEventListener('click', this.toggleDarkMode.bind(this));
     }
+  }
 
-    // Export button
+  initializeExportButton() {
     const exportBtn = document.getElementById('export-btn');
     if (exportBtn) {
       exportBtn.addEventListener('click', this.exportPDF.bind(this));
     }
+  }
 
-    // Share button
+  initializeShareButton() {
     const shareBtn = document.getElementById('share-btn');
     if (shareBtn) {
       shareBtn.addEventListener('click', this.shareSchedule.bind(this));
     }
+  }
 
-    // Add zone button
+  initializeAddZoneButton() {
     const addZoneBtn = document.getElementById('add-zone-btn');
     if (addZoneBtn) {
       addZoneBtn.addEventListener('click', this.addZone.bind(this));
     }
+  }
 
-    // Input fields
-    this.initializeInputFields();
+  initializeInputFields() {
+    this.initializeTimezoneInputs();
+    this.initializeDateTimeInputs();
+  }
 
-    // Copy Table as Plain Text
-    const copyTableBtn = document.getElementById('copy-table-btn');
-    const copyModal = document.getElementById('copy-modal');
-    const copyModalText = document.getElementById('copy-modal-text');
-    const copyModalClose = document.getElementById('copy-modal-close');
-    const copyModalCopy = document.getElementById('copy-modal-copy');
-    if (copyTableBtn) {
-      copyTableBtn.addEventListener('click', () => {
-        const table = document.getElementById('timezone-table');
-        if (!table || table.style.display === 'none') return;
-        let text = '';
-        // Headers
-        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
-        text += headers.join('\t') + '\n';
-        // Rows
-        Array.from(table.querySelectorAll('tbody tr')).forEach(row => {
-          const cells = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim().replace(/\n/g, ' '));
-          text += cells.join('\t') + '\n';
-        });
-        if (copyModal && copyModalText) {
-          copyModalText.value = text;
-          copyModal.style.display = 'flex';
-          copyModalText.focus();
+  initializeTimezoneInputs() {
+    const eventTimezoneInput = document.getElementById('event-timezone');
+    const zoneInput = document.getElementById('zone-input');
+
+    if (eventTimezoneInput) {
+      this.setupTimezoneInput(eventTimezoneInput, 'event-tz-list', true);
+    }
+
+    if (zoneInput) {
+      this.setupTimezoneInput(zoneInput, 'tz-list', false);
+    }
+  }
+
+  setupTimezoneInput(input, listId, isEventTimezone) {
+    input.addEventListener('input', this.debounce((e) => {
+      if (!isEventTimezone || !this.hasSelectedTimezone) {
+        const suggestions = timezoneUtils.getTimezoneSuggestions(e.target.value);
+        this.updateTimezoneSuggestions(listId, suggestions);
+      }
+    }, CONFIG.debounceDelay));
+
+    input.addEventListener('change', () => {
+      if (input.value) {
+        if (isEventTimezone) {
+          this.hasSelectedTimezone = true;
+          table.generate();
+        }
+        this.clearSuggestions(listId);
+      }
+    });
+
+    input.addEventListener('blur', () => {
+      this.clearSuggestions(listId);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        if (isEventTimezone) {
+          this.hasSelectedTimezone = false;
+        }
+        this.clearSuggestions(listId);
+      }
+    });
+
+    if (!isEventTimezone) {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          this.addZone();
+          this.clearSuggestions(listId);
         }
       });
     }
-    if (copyModalClose && copyModal) {
-      copyModalClose.addEventListener('click', () => {
-        copyModal.style.display = 'none';
+  }
+
+  initializeDateTimeInputs() {
+    const inputs = ['input-date', 'input-time', 'input-duration'];
+    inputs.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.addEventListener('change', () => table.generate());
+      }
+    });
+  }
+
+  initializeCopyTable() {
+    const copyTableBtn = document.getElementById('copy-table-btn');
+    const copyModalText = document.getElementById('copy-modal-text');
+    const copyModalCopy = document.getElementById('copy-modal-copy');
+
+    if (copyTableBtn && this.copyModal) {
+      copyTableBtn.addEventListener('click', () => {
+        const table = document.getElementById('timezone-table');
+        if (!table || table.style.display === 'none') return;
+        
+        const optimalOnlyToggle = document.getElementById('optimal-only-toggle');
+        const text = optimalOnlyToggle && optimalOnlyToggle.checked
+          ? this.getOptimalPlainTextTable()
+          : this.getPlainTextTable();
+
+        if (copyModalText) {
+          copyModalText.value = text;
+          this.copyModal.open();
+        }
       });
     }
+
     if (copyModalCopy && copyModalText) {
       copyModalCopy.addEventListener('click', () => {
         copyModalText.select();
@@ -81,249 +176,43 @@ class UI {
         }, 1200);
       });
     }
+  }
 
-    // Keyboard shortcut help modal
-    const shortcutHelpModal = document.getElementById('shortcut-help-modal');
-    const shortcutHelpClose = document.getElementById('shortcut-help-close');
+  initializeShortcutHelp() {
+    const shortcutHelpBtn = document.getElementById('shortcut-help-btn');
+
+    // Keyboard shortcut to open help
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === '/') {
         e.preventDefault();
-        if (shortcutHelpModal) shortcutHelpModal.style.display = 'flex';
-      }
-      if (e.key === 'Escape' && shortcutHelpModal && shortcutHelpModal.style.display === 'flex') {
-        shortcutHelpModal.style.display = 'none';
+        if (this.shortcutHelpModal) this.shortcutHelpModal.open();
       }
     });
-    if (shortcutHelpClose && shortcutHelpModal) {
-      shortcutHelpClose.addEventListener('click', () => {
-        shortcutHelpModal.style.display = 'none';
-      });
-    }
 
-    // Help icon button for keyboard shortcuts
-    const shortcutHelpBtn = document.getElementById('shortcut-help-btn');
-    if (shortcutHelpBtn && shortcutHelpModal) {
+    // Help button click
+    if (shortcutHelpBtn && this.shortcutHelpModal) {
       shortcutHelpBtn.addEventListener('click', () => {
-        shortcutHelpModal.style.display = 'flex';
-        setTimeout(() => {
-          const el = shortcutHelpModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-          if (el) el.focus();
-        }, 0);
-      });
-    }
-
-    // Focus trap for modals
-    function trapFocus(modal) {
-      const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-      const focusableEls = modal.querySelectorAll(focusableSelectors);
-      if (!focusableEls.length) return;
-      const firstEl = focusableEls[0];
-      const lastEl = focusableEls[focusableEls.length - 1];
-      function handleTrap(e) {
-        if (e.key !== 'Tab') return;
-        if (e.shiftKey) {
-          if (document.activeElement === firstEl) {
-            e.preventDefault();
-            lastEl.focus();
-          }
-        } else {
-          if (document.activeElement === lastEl) {
-            e.preventDefault();
-            firstEl.focus();
-          }
-        }
-      }
-      modal.addEventListener('keydown', handleTrap);
-      // Remove event on close
-      function cleanup() { modal.removeEventListener('keydown', handleTrap); }
-      return cleanup;
-    }
-    let copyModalCleanup = null;
-    let shortcutModalCleanup = null;
-    if (copyModal && copyModalClose) {
-      copyModal.addEventListener('transitionend', () => {
-        if (copyModal.style.display === 'flex') {
-          copyModalCleanup = trapFocus(copyModal);
-          // Focus first focusable element
-          setTimeout(() => {
-            const el = copyModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            if (el) el.focus();
-          }, 0);
-        } else if (copyModalCleanup) {
-          copyModalCleanup();
-        }
-      });
-    }
-    if (shortcutHelpModal && shortcutHelpClose) {
-      shortcutHelpModal.addEventListener('transitionend', () => {
-        if (shortcutHelpModal.style.display === 'flex') {
-          shortcutModalCleanup = trapFocus(shortcutHelpModal);
-          setTimeout(() => {
-            const el = shortcutHelpModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            if (el) el.focus();
-          }, 0);
-        } else if (shortcutModalCleanup) {
-          shortcutModalCleanup();
-        }
-      });
-    }
-    // Also trigger focus trap on open (for non-animated modals)
-    if (copyTableBtn) {
-      copyTableBtn.addEventListener('click', () => {
-        if (copyModal && copyModal.style.display === 'flex') {
-          copyModalCleanup = trapFocus(copyModal);
-          setTimeout(() => {
-            const el = copyModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            if (el) el.focus();
-          }, 0);
-        }
-      });
-    }
-    if (shortcutHelpModal) {
-      document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === '/') {
-          setTimeout(() => {
-            if (shortcutHelpModal.style.display === 'flex') {
-              shortcutModalCleanup = trapFocus(shortcutHelpModal);
-              const el = shortcutHelpModal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-              if (el) el.focus();
-            }
-          }, 0);
-        }
+        this.shortcutHelpModal.open();
       });
     }
   }
 
-  initializeInputFields() {
-    const eventTimezoneInput = document.getElementById('event-timezone');
-    const zoneInput = document.getElementById('zone-input');
-
-    if (eventTimezoneInput) {
-      eventTimezoneInput.addEventListener('input', this.debounce((e) => {
-        const suggestions = timezoneUtils.getTimezoneSuggestions(e.target.value);
-        this.updateTimezoneSuggestions('event-tz-list', suggestions);
-      }, CONFIG.debounceDelay));
-
-      eventTimezoneInput.addEventListener('change', () => {
-        if (eventTimezoneInput.value) {
-          table.generate();
-        }
-      });
-    }
-
-    if (zoneInput) {
-      zoneInput.addEventListener('input', this.debounce((e) => {
-        const suggestions = timezoneUtils.getTimezoneSuggestions(e.target.value);
-        this.updateTimezoneSuggestions('tz-list', suggestions);
-      }, CONFIG.debounceDelay));
-
-      zoneInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          this.addZone();
-        }
-      });
-    }
-
-    // Add change listeners for date, time, and duration inputs
-    const inputs = ['input-date', 'input-time', 'input-duration'];
-    inputs.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.addEventListener('change', () => table.generate());
-      }
-    });
-  }
-
-  addZone() {
-    const input = document.getElementById('zone-input');
-    if (!input) return;
-    
-    let zone = input.value.trim();
-    
-    if (!zone) {
-      input.focus();
-      return;
-    }
-    
-    const zones = storage.getZones();
-    if (zones.includes(zone)) {
-      this.showError(`⚠️ ${zone} is already added`);
-      input.value = "";
-      input.focus();
-      return;
-    }
-    
-    const zonesToTry = [
-      zone,
-      zone.replace(/\s+/g, '_'),
-      zone.replace(/_/g, ' '),
-      zone.split('/').map(part => 
-        part.split('_').map(word => 
-          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        ).join('_')
-      ).join('/'),
-      zone.toUpperCase() === 'EST' ? 'America/New_York' : zone,
-      zone.toUpperCase() === 'PST' ? 'America/Los_Angeles' : zone,
-      zone.toUpperCase() === 'MST' ? 'America/Denver' : zone,
-      zone.toUpperCase() === 'CST' ? 'America/Chicago' : zone,
-      zone.toUpperCase() === 'GMT' ? 'Europe/London' : zone,
-      zone.toUpperCase() === 'UTC' ? 'UTC' : zone
-    ];
-    
-    let validZone = null;
-    for (const testZone of zonesToTry) {
-      if (timezoneUtils.isValidTimezone(testZone)) {
-        validZone = testZone;
-        break;
-      }
-    }
-    
-    if (validZone) {
-      const zones = storage.getZones();
-      zones.push(validZone);
-      storage.setZones(zones);
-      input.value = "";
-      input.focus();
-      this.updateZoneDisplay();
-      table.generate();
-    } else {
-      this.showError(`Invalid time zone: "${zone}". Try selecting from dropdown suggestions.`);
-      input.focus();
-      input.select();
+  clearSuggestions(listId) {
+    const datalist = document.getElementById(listId);
+    if (datalist) {
+      datalist.innerHTML = '';
     }
   }
 
-  updateZoneDisplay() {
-    const container = document.getElementById('selected-zones');
-    const wrapper = document.getElementById('selected-zones-container');
-    
-    if (!container || !wrapper) return;
-    
-    const zones = storage.getZones();
-    if (zones.length === 0) {
-      wrapper.style.display = 'none';
-      return;
-    }
-    
-    wrapper.style.display = 'block';
-    container.innerHTML = zones.map(zone => `
-      <div class="zone-chip">
-        <span>${timezoneUtils.getTimezoneDisplayName(zone)}</span>
-        <button class="remove-btn btn btn-icon" data-zone="${zone}" aria-label="Remove ${zone}">
-          <span class="material-icons">close</span>
-        </button>
-      </div>
-    `).join('');
+  updateTimezoneSuggestions(listId, suggestions) {
+    const datalist = document.getElementById(listId);
+    if (!datalist) return;
 
-    // Add click handlers for remove buttons
-    container.querySelectorAll('.remove-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const zone = btn.dataset.zone;
-        const zones = storage.getZones().filter(z => z !== zone);
-        storage.setZones(zones);
-        this.updateZoneDisplay();
-        table.generate();
-      });
+    datalist.innerHTML = '';
+    suggestions.forEach(tz => {
+      const option = document.createElement('option');
+      option.value = tz;
+      datalist.appendChild(option);
     });
   }
 
@@ -370,15 +259,6 @@ class UI {
     button.disabled = isLoading;
   }
 
-  updateTimezoneSuggestions(listId, suggestions) {
-    const datalist = document.getElementById(listId);
-    if (!datalist) return;
-
-    datalist.innerHTML = suggestions
-      .map(tz => `<option value="${tz}"></option>`)
-      .join('');
-  }
-
   toggleDarkMode() {
     const body = document.body;
     const isDark = body.getAttribute('data-theme') === 'dark';
@@ -387,13 +267,59 @@ class UI {
   }
 
   exportPDF() {
+    if (this.isPrinting) return;
+    
+    if (this.printTimeout) {
+      clearTimeout(this.printTimeout);
+      this.printTimeout = null;
+    }
+
+    this.isPrinting = true;
     this.setLoading('export-btn', true);
+    
+    const optimalOnlyToggle = document.getElementById('optimal-only-toggle');
+    const table = document.getElementById('timezone-table');
+    
+    if (!table) {
+      this.setLoading('export-btn', false);
+      this.isPrinting = false;
+      return;
+    }
+
+    const allRows = Array.from(table.querySelectorAll('tbody tr'));
+    const originalDisplayStates = allRows.map(row => row.style.display);
+
     try {
-      window.print();
+      if (optimalOnlyToggle && optimalOnlyToggle.checked) {
+        allRows.forEach(row => {
+          if (!row.classList.contains('smart-slot')) {
+            row.style.display = 'none';
+          }
+        });
+      }
+
+      const afterPrintHandler = () => {
+        allRows.forEach((row, index) => {
+          row.style.display = originalDisplayStates[index];
+        });
+        this.setLoading('export-btn', false);
+        
+        this.printTimeout = setTimeout(() => {
+          this.isPrinting = false;
+          this.printTimeout = null;
+        }, 500);
+      };
+
+      window.addEventListener('afterprint', afterPrintHandler, { once: true });
+
+      setTimeout(() => {
+        window.print();
+      }, 100);
+
     } catch (error) {
       this.showError('Failed to export PDF. Please try again.');
-    } finally {
       this.setLoading('export-btn', false);
+      this.isPrinting = false;
     }
   }
 
@@ -473,6 +399,19 @@ class UI {
     return text;
   }
 
+  getOptimalPlainTextTable() {
+    const table = document.getElementById('timezone-table');
+    if (!table || table.style.display === 'none') return '';
+    let text = '';
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+    text += headers.join('\t') + '\n';
+    Array.from(table.querySelectorAll('tbody tr.smart-slot')).forEach(row => {
+      const cells = Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim().replace(/\n/g, ' '));
+      text += cells.join('\t') + '\n';
+    });
+    return text;
+  }
+
   showSuccess(message) {
     if (!this.errorContainer) return;
     this.errorContainer.textContent = message;
@@ -480,6 +419,100 @@ class UI {
     setTimeout(() => {
       this.errorContainer.classList.remove('show', 'success');
     }, CONFIG.errorMessageDuration);
+  }
+
+  addZone() {
+    const input = document.getElementById('zone-input');
+    if (!input) return;
+    
+    let zone = input.value.trim();
+    
+    if (!zone) {
+      input.focus();
+      return;
+    }
+    
+    const zones = storage.getZones();
+    if (zones.includes(zone)) {
+      this.showError(`⚠️ ${zone} is already added`);
+      input.value = "";
+      input.focus();
+      return;
+    }
+    
+    const validZone = this.normalizeAndValidateTimezone(zone);
+    
+    if (validZone) {
+      zones.push(validZone);
+      storage.setZones(zones);
+      input.value = "";
+      input.focus();
+      this.updateZoneDisplay();
+      table.generate();
+    } else {
+      this.showError(`Invalid time zone: "${zone}". Try selecting from dropdown suggestions.`);
+      input.focus();
+      input.select();
+    }
+  }
+
+  normalizeAndValidateTimezone(zone) {
+    const zonesToTry = [
+      zone,
+      zone.replace(/\s+/g, '_'),
+      zone.replace(/_/g, ' '),
+      zone.split('/').map(part => 
+        part.split('_').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        ).join('_')
+      ).join('/'),
+      zone.toUpperCase() === 'EST' ? 'America/New_York' : zone,
+      zone.toUpperCase() === 'PST' ? 'America/Los_Angeles' : zone,
+      zone.toUpperCase() === 'MST' ? 'America/Denver' : zone,
+      zone.toUpperCase() === 'CST' ? 'America/Chicago' : zone,
+      zone.toUpperCase() === 'GMT' ? 'Europe/London' : zone,
+      zone.toUpperCase() === 'UTC' ? 'UTC' : zone
+    ];
+    
+    for (const testZone of zonesToTry) {
+      if (timezoneUtils.isValidTimezone(testZone)) {
+        return testZone;
+      }
+    }
+    return null;
+  }
+
+  updateZoneDisplay() {
+    const container = document.getElementById('selected-zones');
+    const wrapper = document.getElementById('selected-zones-container');
+    
+    if (!container || !wrapper) return;
+    
+    const zones = storage.getZones();
+    if (zones.length === 0) {
+      wrapper.style.display = 'none';
+      return;
+    }
+    
+    wrapper.style.display = 'block';
+    container.innerHTML = zones.map(zone => `
+      <div class="zone-chip">
+        <span>${timezoneUtils.getTimezoneDisplayName(zone)}</span>
+        <button class="remove-btn btn btn-icon" data-zone="${zone}" aria-label="Remove ${zone}">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    `).join('');
+
+    container.querySelectorAll('.remove-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const zone = btn.dataset.zone;
+        const zones = storage.getZones().filter(z => z !== zone);
+        storage.setZones(zones);
+        this.updateZoneDisplay();
+        table.generate();
+      });
+    });
   }
 }
 

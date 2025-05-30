@@ -610,15 +610,117 @@
     @media print {
       body {
         background: white;
+        margin: 0;
+        padding: 0;
       }
       
-      .toolbar, .controls {
-        display: none;
+      .app-container {
+        padding: 0;
+        max-width: none;
+      }
+
+      .header {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .header .subtitle {
+        font-size: 14px;
+      }
+
+      .toolbar, 
+      .controls,
+      .legend,
+      .btn,
+      .add-zone-btn,
+      .theme-toggle,
+      .skip-link {
+        display: none !important;
       }
       
       .main-card {
         box-shadow: none;
-        border: 1px solid #000;
+        border: none;
+      }
+
+      .table-container {
+        margin: 0;
+        box-shadow: none;
+      }
+
+      table {
+        font-size: 12px;
+        border-collapse: collapse;
+      }
+
+      thead th {
+        padding: 8px 4px;
+        font-size: 12px;
+        background: #f8f9fa !important;
+        color: #000 !important;
+        border: 1px solid #ddd;
+      }
+
+      tbody td {
+        padding: 6px 4px;
+        border: 1px solid #ddd;
+      }
+
+      .time-cell.work {
+        background: #e6f3e6 !important;
+        color: #000 !important;
+      }
+
+      .time-cell.sleep {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+      }
+
+      .time-cell.off {
+        background: #fff3e6 !important;
+        color: #000 !important;
+      }
+
+      .smart-slot td {
+        background: #e6f3e6 !important;
+        color: #000 !important;
+        font-weight: bold;
+      }
+
+      .smart-slot td::before {
+        display: none;
+      }
+
+      /* Ensure page breaks don't split rows */
+      tr {
+        page-break-inside: avoid;
+      }
+
+      /* Add page number */
+      @page {
+        margin: 1cm;
+      }
+
+      /* Add title to each page */
+      @page :first {
+        margin-top: 2cm;
+      }
+
+      /* Hide empty state */
+      .empty-state {
+        display: none !important;
+      }
+
+      /* Optimize colors for printing */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
     }
 
@@ -766,6 +868,10 @@
         <button class="btn btn-icon" id="copy-table-btn" aria-label="Copy table as plain text" title="Copy table">
           <span class="material-icons">content_copy</span>
         </button>
+        <label style="display: flex; align-items: center; gap: 0.3em; font-size: 0.95em; cursor: pointer; margin-left: 0.5em;">
+          <input type="checkbox" id="optimal-only-toggle" style="margin: 0; vertical-align: middle;" />
+          <span>Optimal Only</span>
+        </label>
         <button class="btn btn-icon" id="share-btn" aria-label="Share schedule" title="Share">
           <span class="material-icons">share</span>
         </button>
@@ -852,7 +958,7 @@
       <h2 class="modal-header" id="copy-modal-header"><span class="material-icons" style="vertical-align: middle; font-size: 1.2em; margin-right: 0.5em;">content_copy</span>Copy Table as Plain Text</h2>
       <textarea id="copy-modal-text" class="modal-textarea" readonly></textarea>
       <div class="modal-footer">
-        <button class="btn btn-secondary" id="copy-modal-close" aria-label="Close modal"><span class="material-icons">close</span> Close</button>
+        <button class="btn btn-secondary" id="copy-modal-close" data-modal-close aria-label="Close modal"><span class="material-icons">close</span> Close</button>
         <button class="btn btn-primary" id="copy-modal-copy" aria-label="Copy to clipboard"><span class="material-icons">content_copy</span> Copy</button>
       </div>
     </div>
@@ -868,7 +974,7 @@
         <li><b>Save Schedule:</b> <kbd>Ctrl/Cmd + S</kbd></li>
       </ul>
       <div class="modal-footer">
-        <button class="btn btn-secondary" id="shortcut-help-close" aria-label="Close modal"><span class="material-icons">close</span> Close</button>
+        <button class="btn btn-secondary" id="shortcut-help-close" data-modal-close aria-label="Close modal"><span class="material-icons">close</span> Close</button>
       </div>
     </div>
   </div>

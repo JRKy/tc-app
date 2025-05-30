@@ -81,17 +81,26 @@ class Table {
     const tableHead = this.table.querySelector('thead');
     if (!tableHead) return;
 
+    const dateInput = document.getElementById('input-date');
+    const [year, month, day] = dateInput.value.split('-').map(Number);
+    const eventDate = new Date(year, month - 1, day);
+
     const headRow = document.createElement('tr');
     const eventDisplayName = timezoneUtils.getTimezoneDisplayName(eventTimezone);
-    const isEventDST = timezoneUtils.isDST(eventTimezone);
+    const isEventDST = timezoneUtils.isDST(eventTimezone, eventDate);
+    const eventOffset = timezoneUtils.getUTCOffset(eventTimezone, eventDate);
+    
     // Event column header with icon
-    let headerContent = `<th scope="col"><span class="header-icon material-icons">public</span><br>📍 ${eventDisplayName}${isEventDST ? ' *' : ''}<br><small>Event Time</small></th>`;
+    let headerContent = `<th scope="col"><span class="header-icon material-icons">public</span><br>📍 ${eventDisplayName}${isEventDST ? ' *' : ''}<br><small>${eventOffset}</small></th>`;
+    
     // Viewer columns with icon
     storage.getZones().forEach(zone => {
       const displayName = timezoneUtils.getTimezoneDisplayName(zone);
-      const isDST = timezoneUtils.isDST(zone);
-      headerContent += `<th scope="col"><span class="header-icon material-icons">group</span><br>👥 ${displayName}${isDST ? ' *' : ''}<br><small>Viewer</small></th>`;
+      const isDST = timezoneUtils.isDST(zone, eventDate);
+      const offset = timezoneUtils.getUTCOffset(zone, eventDate);
+      headerContent += `<th scope="col"><span class="header-icon material-icons">group</span><br>👥 ${displayName}${isDST ? ' *' : ''}<br><small>${offset}</small></th>`;
     });
+    
     headRow.innerHTML = headerContent;
     tableHead.innerHTML = '';
     tableHead.appendChild(headRow);
@@ -137,7 +146,7 @@ class Table {
     
     const displayTime = timezoneUtils.formatTime(utcTime, eventTimezone);
     const displayDate = timezoneUtils.formatDate(utcTime, eventTimezone);
-    const isDST = timezoneUtils.isDST(eventTimezone);
+    const isDST = timezoneUtils.isDST(eventTimezone, utcTime);
     
     return `<td class="time-cell ${timeClass}" style="font-weight: bold; border-left: 4px solid #667eea;">${displayTime}${isDST ? ' *' : ''}<br><small>${displayDate}</small></td>`;
   }
@@ -149,7 +158,7 @@ class Table {
     const timeClass = timezoneUtils.getTimeClass(hour, minute);
     const displayTime = timezoneUtils.formatTime(utcTime, zone);
     const displayDate = timezoneUtils.formatDate(utcTime, zone);
-    const isDST = timezoneUtils.isDST(zone);
+    const isDST = timezoneUtils.isDST(zone, utcTime);
     
     return `<td class="time-cell ${timeClass}">${displayTime}${isDST ? ' *' : ''}<br><small>${displayDate}</small></td>`;
   }

@@ -80,22 +80,48 @@ class TimezoneUtils {
     return new Intl.DateTimeFormat('en-US', options).format(date);
   }
 
-  isDST(timezone) {
+  isDST(timezone, date = new Date()) {
     try {
       if (timezone === 'UTC') return false;
       
-      const now = new Date();
-      const jan = new Date(now.getFullYear(), 0, 1);
-      const jul = new Date(now.getFullYear(), 6, 1);
+      // Get the offset for the given date
+      const dateOffset = new Date(date.toLocaleString('en-US', { timeZone: timezone })).getTimezoneOffset();
       
-      const janOffset = new Date(jan.toLocaleString('en-US', { timeZone: timezone })).getTimezoneOffset();
-      const julOffset = new Date(jul.toLocaleString('en-US', { timeZone: timezone })).getTimezoneOffset();
+      // Get the offset for January 1st of the same year (non-DST period)
+      const janDate = new Date(date.getFullYear(), 0, 1);
+      const janOffset = new Date(janDate.toLocaleString('en-US', { timeZone: timezone })).getTimezoneOffset();
       
-      // If the offset in July is greater than in January, it means DST is in effect
-      return janOffset !== julOffset;
+      // If the current date's offset is different from January's offset, DST is in effect
+      return dateOffset !== janOffset;
     } catch (e) {
       console.error('Error checking DST for timezone:', timezone, e);
       return false;
+    }
+  }
+
+  getUTCOffset(timezone, date = new Date()) {
+    try {
+      if (timezone === 'UTC') return 'UTC+00:00';
+      
+      const options = {
+        timeZone: timezone,
+        timeZoneName: 'shortOffset'
+      };
+      
+      const formatter = new Intl.DateTimeFormat('en-US', options);
+      const parts = formatter.formatToParts(date);
+      const offsetPart = parts.find(part => part.type === 'timeZoneName');
+      
+      if (offsetPart) {
+        return offsetPart.value.replace('GMT', 'UTC');
+      }
+      
+      // Fallback if timeZoneName is not supported
+      const offset = -date.toLocaleString('en-US', { timeZone: timezone }).split('GMT')[1].split(' ')[0];
+      return `UTC${offset}`;
+    } catch (e) {
+      console.error('Error getting UTC offset for timezone:', timezone, e);
+      return '';
     }
   }
 }
