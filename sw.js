@@ -1,14 +1,14 @@
 const CACHE_NAME = "timesync-v2";
-const OFFLINE_URL = "./index.html";
+const OFFLINE_URL = "/tc-app/index.html";
 
 const urlsToCache = [
-  "./",
-  "./index.html",
-  "./assets/manifest.json",
-  "./assets/icon-192x192.png",
-  "./assets/icon-512x512.png",
-  "./assets/favicon.png",
-  "./assets/logo.svg",
+  "/tc-app/",
+  "/tc-app/index.html",
+  "/tc-app/assets/manifest.json",
+  "/tc-app/assets/icon-192x192.png",
+  "/tc-app/assets/icon-512x512.png",
+  "/tc-app/assets/favicon.png",
+  "/tc-app/assets/logo.svg",
   // Add any other static assets you want to cache
 ];
 
